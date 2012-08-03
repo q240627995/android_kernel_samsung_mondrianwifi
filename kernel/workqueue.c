@@ -1382,10 +1382,10 @@ static void __queue_delayed_work(int cpu, struct workqueue_struct *wq,
 	struct work_struct *work = &dwork->work;
 	unsigned int lcpu;
 
-	WARN_ON_ONCE(timer->function != delayed_work_timer_fn ||
-		     timer->data != (unsigned long)dwork);
-	WARN_ON_ONCE(timer_pending(timer));
-	WARN_ON_ONCE(!list_empty(&work->entry));
+		WARN_ON_ONCE(timer->function != delayed_work_timer_fn ||
+			     timer->data != (unsigned long)dwork);
+		WARN_ON_ONCE(timer_pending(timer));
+		WARN_ON_ONCE(!list_empty(&work->entry));
 
 	/*
 	 * If @delay is 0, queue @dwork->work immediately.  This is for
@@ -1424,8 +1424,7 @@ static void __queue_delayed_work(int cpu, struct workqueue_struct *wq,
 
 	set_work_cwq(work, get_cwq(lcpu, wq), 0);
 
-	dwork->cpu = cpu;
-	timer->expires = jiffies + delay;
+		timer->expires = jiffies + delay;
 
 	if (unlikely(cpu != WORK_CPU_UNBOUND))
 		add_timer_on(timer, cpu);
