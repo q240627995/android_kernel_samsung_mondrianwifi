@@ -35,6 +35,7 @@
 #include <linux/mm.h>
 #include <linux/oom.h>
 #include <linux/sched.h>
+#include <linux/swap.h>
 #include <linux/rcupdate.h>
 #include <linux/notifier.h>
 #include <linux/mutex.h>
@@ -164,7 +165,7 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 	}
 
 #ifndef CONFIG_CMA
-	other_free = global_page_state(NR_FREE_PAGES);
+	other_free = global_page_state(NR_FREE_PAGES) - totalreserve_pages;
 #else
 	other_free = global_page_state(NR_FREE_PAGES) -
 					global_page_state(NR_FREE_CMA_PAGES);
