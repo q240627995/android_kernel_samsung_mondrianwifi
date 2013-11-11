@@ -200,7 +200,7 @@ static void prandom_start_seed_timer(void)
  *	Generate better values after random number generator
  *	is fully initialized.
  */
-static int __init prandom_reseed(void)
+static void __prandom_reseed(bool late)
 {
 	int i;
 	unsigned long flags;
