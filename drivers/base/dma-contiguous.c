@@ -557,36 +557,23 @@ unsigned long dma_alloc_from_contiguous(struct device *dev, int count,
 
 	mask = (1 << align) - 1;
 
+	mutex_lock(&cma_mutex);
 
 	for (;;) {
-		mutex_lock(&cma->lock);
 		pageno = bitmap_find_next_zero_area(cma->bitmap, cma->count,
 						    start, count, mask);
-		if (pageno >= cma->count) {
-			mutex_unlock(&cma->lock);
+		if (pageno >= cma->count)
 			break;
-		}
-		bitmap_set(cma->bitmap, pageno, count);
-		/*
-		 * It's safe to drop the lock here. We've marked this region for
-		 * our exclusive use. If the migration fails we will take the
-		 * lock again and unmark it.
-		 */
-		mutex_unlock(&cma->lock);
 
 		pfn = cma->base_pfn + pageno;
-		if (cma->in_system) {
-			mutex_lock(&cma_mutex);
+		if (cma->in_system)
 			ret = alloc_contig_range(pfn, pfn + count, MIGRATE_CMA);
-			mutex_unlock(&cma_mutex);
-		}
 		if (ret == 0) {
+			bitmap_set(cma->bitmap, pageno, count);
 			break;
 		} else if (ret != -EBUSY) {
-			clear_cma_bitmap(cma, pfn, count);
 			break;
 		}
-		clear_cma_bitmap(cma, pfn, count);
 		tries++;
 		trace_dma_alloc_contiguous_retry(tries);
 
@@ -596,6 +583,7 @@ unsigned long dma_alloc_from_contiguous(struct device *dev, int count,
 		start = pageno + mask + 1;
 	}
 
+	mutex_unlock(&cma_mutex);
 	pr_debug("%s(): returned %lx\n", __func__, pfn);
 	return pfn;
 }
@@ -627,7 +615,9 @@ bool dma_release_from_contiguous(struct device *dev, unsigned long pfn,
 
 	if (cma->in_system)
 		free_contig_range(pfn, count);
-	clear_cma_bitmap(cma, pfn, count);
+	mutex_lock(&cma_mutex);
+	bitmap_clear(cma->bitmap, pfn - cma->base_pfn, count);
+	mutex_unlock(&cma_mutex);
 
 	return true;
 }
