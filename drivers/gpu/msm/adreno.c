@@ -81,26 +81,11 @@
 static void adreno_start_work(struct work_struct *work);
 static void adreno_input_work(struct work_struct *work);
 
-/*
- * The default values for the simpleondemand governor are 90 and 5,
- * we use different values here.
- * They have to be tuned and compare with the tz governor anyway.
- */
-static struct devfreq_simple_ondemand_data adreno_ondemand_data = {
-	.upthreshold = 80,
-	.downdifferential = 20,
-};
-
 static struct devfreq_msm_adreno_tz_data adreno_tz_data = {
 	.bus = {
-		.max = 450,
+		.max = 350,
 	},
 	.device_id = KGSL_DEVICE_3D0,
-};
-
-static const struct devfreq_governor_data adreno_governors[] = {
-	{ .name = "simple_ondemand", .data = &adreno_ondemand_data },
-	{ .name = "msm-adreno-tz", .data = &adreno_tz_data },
 };
 
 static const struct kgsl_functable adreno_functable;
@@ -108,8 +93,7 @@ static const struct kgsl_functable adreno_functable;
 static struct adreno_device device_3d0 = {
 	.dev = {
 		KGSL_DEVICE_COMMON_INIT(device_3d0.dev),
-		.pwrscale = KGSL_PWRSCALE_INIT(adreno_governors,
-					ARRAY_SIZE(adreno_governors)),
+		.pwrscale = KGSL_PWRSCALE_INIT(&adreno_tz_data),
 		.name = DEVICE_3D0_NAME,
 		.id = KGSL_DEVICE_3D0,
 		.mmu = {
@@ -2396,6 +2380,89 @@ static ssize_t _wake_nice_show(struct device *dev,
 	return snprintf(buf, PAGE_SIZE, "%d\n", _wake_nice);
 }
 
+/**
+ * _ft_hang_intr_status_store -  Routine to enable/disable h/w hang interrupt
+ * @dev: device ptr
+ * @attr: Device attribute
+ * @buf: value to write
+ * @count: size of the value to write
+ */
+static ssize_t _ft_hang_intr_status_store(struct device *dev,
+				struct device_attribute *attr,
+				const char *buf, size_t count)
+{
+	unsigned int new_setting, old_setting;
+	struct kgsl_device *device = kgsl_device_from_dev(dev);
+	struct adreno_device *adreno_dev;
+	int ret;
+	if (device == NULL)
+		return 0;
+	adreno_dev = ADRENO_DEVICE(device);
+
+	mutex_lock(&device->mutex);
+	ret = _ft_sysfs_store(buf, count, &new_setting);
+	if (ret != count)
+		goto done;
+	if (new_setting)
+		new_setting = 1;
+	old_setting =
+		(test_bit(ADRENO_DEVICE_HANG_INTR, &adreno_dev->priv) ? 1 : 0);
+	if (new_setting != old_setting) {
+		if (new_setting)
+			set_bit(ADRENO_DEVICE_HANG_INTR, &adreno_dev->priv);
+		else
+			clear_bit(ADRENO_DEVICE_HANG_INTR, &adreno_dev->priv);
+		/* Set the new setting based on device state */
+		switch (device->state) {
+		case KGSL_STATE_NAP:
+		case KGSL_STATE_SLEEP:
+			kgsl_pwrctrl_clk(device, KGSL_PWRFLAGS_ON,
+					device->state);
+		case KGSL_STATE_ACTIVE:
+			adreno_dev->gpudev->irq_control(adreno_dev, 1);
+		/*
+		 * For following states setting will be picked up on device
+		 * start. Still need them in switch statement to differentiate
+		 * from default
+		 */
+		case KGSL_STATE_SLUMBER:
+		case KGSL_STATE_SUSPEND:
+			break;
+		default:
+			ret = -EACCES;
+			/* reset back to old setting on error */
+			if (new_setting)
+				clear_bit(ADRENO_DEVICE_HANG_INTR,
+					&adreno_dev->priv);
+			else
+				set_bit(ADRENO_DEVICE_HANG_INTR,
+					&adreno_dev->priv);
+			goto done;
+		}
+	}
+done:
+	mutex_unlock(&device->mutex);
+	return ret;
+}
+
+/**
+ * _ft_hang_intr_status_show() -  Routine to read hardware hang interrupt
+ * enablement
+ * @dev: device ptr
+ * @attr: Device attribute
+ * @buf: value read
+ */
+static ssize_t _ft_hang_intr_status_show(struct device *dev,
+					struct device_attribute *attr,
+					char *buf)
+{
+	struct adreno_device *adreno_dev = _get_adreno_dev(dev);
+	if (adreno_dev == NULL)
+		return 0;
+	return snprintf(buf, PAGE_SIZE, "%d\n",
+		test_bit(ADRENO_DEVICE_HANG_INTR, &adreno_dev->priv) ? 1 : 0);
+}
+
 #define FT_DEVICE_ATTR(name) \
 	DEVICE_ATTR(name, 0644,	_ ## name ## _show, _ ## name ## _store);
 
@@ -2404,7 +2471,7 @@ FT_DEVICE_ATTR(ft_pagefault_policy);
 FT_DEVICE_ATTR(ft_fast_hang_detect);
 FT_DEVICE_ATTR(ft_long_ib_detect);
 
-static FT_DEVICE_ATTR(wake_nice);
+static DEVICE_INT_ATTR(wake_nice, 0644, _wake_nice);
 static FT_DEVICE_ATTR(wake_timeout);
 
 const struct device_attribute *ft_attr_list[] = {
@@ -2412,7 +2479,7 @@ const struct device_attribute *ft_attr_list[] = {
 	&dev_attr_ft_pagefault_policy,
 	&dev_attr_ft_fast_hang_detect,
 	&dev_attr_ft_long_ib_detect,
-	&dev_attr_wake_nice,
+	&dev_attr_wake_nice.attr,
 	&dev_attr_wake_timeout,
 	NULL,
 };
