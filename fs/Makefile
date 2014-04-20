@@ -133,3 +133,4 @@ obj-$(CONFIG_PSTORE)		+= pstore/
 obj-$(CONFIG_YAFFS_FS)		+= yaffs2/
 
 obj-$(CONFIG_F2FS_FS)		+= f2fs/
+obj-$(CONFIG_DYNAMIC_FSYNC)	+= dyn_sync_cntrl.o
