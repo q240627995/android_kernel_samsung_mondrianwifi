@@ -698,9 +698,9 @@ static struct attribute *default_attrs[] = {
 	&scaling_driver.attr,
 	&scaling_available_governors.attr,
 	&scaling_setspeed.attr,
-	#ifdef CONFIG_MSM_CPU_VOLTAGE_CONTROL
+#ifdef CONFIG_MSM_CPU_VOLTAGE_CONTROL
 	&UV_mV_table.attr,
-	#endif
+#endif
 	NULL
 };
 
