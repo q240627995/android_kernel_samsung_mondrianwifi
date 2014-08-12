@@ -26,8 +26,20 @@
 #include <linux/slab.h>
 #include <linux/time.h>
 #include "logger.h"
+#include <linux/powersuspend.h>
 
 #include <asm/ioctls.h>
+
+/*
+ * 0 - Enabled
+ * 1 - Auto Suspend
+ * 2 - Disabled
+ */
+static unsigned int log_mode = 2;
+static unsigned int log_enabled = 1; // Do not change this value
+
+module_param(log_mode, uint, S_IWUSR | S_IRUGO);
+
 #ifdef CONFIG_SEC_DEBUG
 #include <mach/sec_debug.h>
 static char klog_buf[256];
@@ -456,6 +468,22 @@ static ssize_t do_write_log_from_user(struct logger_log *log,
 	return count;
 }
 
+static void log_early_suspend(struct power_suspend *handler)
+{
+	if (log_mode)
+	  log_enabled = 0;
+}
+
+static void log_late_resume(struct power_suspend *handler)
+{
+	log_enabled = 1;
+}
+
+static struct power_suspend log_suspend = {
+	.suspend = log_early_suspend,
+	.resume = log_late_resume,
+};
+
 /*
  * logger_aio_write - our write method, implementing support for write(),
  * writev(), and aio_write(). Writes are our fast path, and we try to optimize
@@ -464,11 +492,16 @@ static ssize_t do_write_log_from_user(struct logger_log *log,
 ssize_t logger_aio_write(struct kiocb *iocb, const struct iovec *iov,
 			 unsigned long nr_segs, loff_t ppos)
 {
-	struct logger_log *log = file_get_log(iocb->ki_filp);
-	size_t orig = log->w_off;
+	struct logger_log *log;
+	size_t orig, ret = 0;
 	struct logger_entry header;
 	struct timespec now;
-	ssize_t ret = 0;
+	
+	if (!log_enabled || log_mode == 2)
+		return 0;
+	
+	log = file_get_log(iocb->ki_filp);
+	orig = log->w_off;
 
 	now = current_kernel_time();
 
@@ -824,6 +857,8 @@ int sec_debug_subsys_set_logger_info(
 static int __init logger_init(void)
 {
 	int ret;
+	
+	register_power_suspend(&log_suspend);
 
 	ret = init_log(&log_main);
 	if (unlikely(ret))
