@@ -47,3 +47,8 @@ config EDP_ESD_FUNCTION
 config EDP_TCON_MDNIE
 	bool "Support EDP mdnie function"
 	default n
+
+config LCD_NOTIFY
+	depends on FB_MSM_MDSS
+	bool "LCD Notify"
+	default y	
