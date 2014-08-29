@@ -4015,5 +4015,13 @@ config SPEED_LEVEL_INTERFACE
         help
          Allow SPEED level to be shown into specific kernel apps
 
+config MSM_LIMITER
+	bool "MSM Frequency Limiter Driver"
+	depends on (LCD_NOTIFY || POWERSUSPEND || HAS_EARLYSUSPEND)
+	default n
+	help
+	  The MSM Frequency Limiter Driver controls max frequency limit for each CPU
+
+
 endif	 
          
