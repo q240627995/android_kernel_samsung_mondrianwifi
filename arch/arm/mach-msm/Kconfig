@@ -4002,6 +4002,13 @@ config KRAIT_REGULATOR
 	 regulators running in ganged mode inside the PMIC. Enable
 	 this option to support such configurations.
 
+config CHARGE_LEVEL
+	bool "Charge level interface"
+	default y
+	help
+	  Allows configuration of ac and usb charging levels
+
+endif		 
 
 config EXTEND_SERIAL_NUM_16
 	bool "serial number is 16 digit"
