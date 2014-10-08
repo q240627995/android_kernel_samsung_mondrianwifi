@@ -4005,4 +4005,9 @@ config MACH_TABPRO
 	  Support for common elements between mondrianwifi, mondrian3g,
 	  mondrianlte, picassolte and viennalte.
 
-endif
+config PVS_LEVEL_INTERFACE
+	bool "Expose PVS level information in sys fs (Boeffla-Kernel)"
+	help
+	 Allow PVS level to be shown in Boeffla-Config app
+
+endif	 
