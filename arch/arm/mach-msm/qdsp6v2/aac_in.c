@@ -192,7 +192,7 @@ static long aac_in_ioctl(struct file *file,
 			rc = -EINVAL;
 			break;
 		}
-		if ((cfg.sample_rate < 8000) && (cfg.sample_rate > 48000)) {
+		if ((cfg.sample_rate < 8000) || (cfg.sample_rate > 48000)) {
 			pr_err("%s: ERROR in setting samplerate = %d\n",
 				__func__, cfg.sample_rate);
 			rc = -EINVAL;
@@ -201,7 +201,16 @@ static long aac_in_ioctl(struct file *file,
 		/* For aac-lc, min_bit_rate = min(24Kbps, 0.5*SR*num_chan);
 		max_bi_rate = min(192Kbps, 6*SR*num_chan);
 		min_sample_rate = 8000Hz, max_rate=48000 */
-		if ((cfg.bit_rate < 4000) || (cfg.bit_rate > 192000)) {
+		min_bitrate = ((cfg.sample_rate)*(cfg.channels))/2;
+		if (min_bitrate < 24000)
+			min_bitrate = 24000;
+		max_bitrate = 6*(cfg.sample_rate)*(cfg.channels);
+		if (max_bitrate > 320000)
+			max_bitrate = 320000;
+		if ((cfg.bit_rate < min_bitrate) ||
+					(cfg.bit_rate > max_bitrate)) {
+			pr_err("%s: bitrate permissible: max=%d, min=%d\n",
+				__func__, max_bitrate, min_bitrate);
 			pr_err("%s: ERROR in setting bitrate = %d\n",
 				__func__, cfg.bit_rate);
 			rc = -EINVAL;
