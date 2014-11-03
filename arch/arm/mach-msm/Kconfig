@@ -3999,18 +3999,26 @@ config MUIC_RESET_PIN_ENABLE
                 This request is from H/W team
 		In case of mUIC voltage drop, mUIC will be reset
 
-config SIMPLE_PLUG
-	bool "Enable simple-plug cpu hotplug driver"
-	default n
-	help
-	  Generic simple-plug cpu hotplug driver for ARM SOCs
+#config SIMPLE_PLUG
+#	bool "Enable simple-plug cpu hotplug driver"
+#	default n
+#	help
+#	  Generic simple-plug cpu hotplug driver for ARM SOCs
 
-config SIMPLE_PLUG_STATS
-	bool "Enable simple-plug run-time statistics"
-	depends on SIMPLE_PLUG
+#config SIMPLE_PLUG_STATS
+#	bool "Enable simple-plug run-time statistics"
+#	depends on SIMPLE_PLUG
+#	default n
+#	help
+#	  This adds a slight CPU cost and therefore is disabled
+#	  by default.
+
+config FORCE_FAST_CHARGE
+	bool "Force fast charging (AC/USB) by Yank555.lu"
 	default n
 	help
-	  This adds a slight CPU cost and therefore is disabled
-	  by default.
+	  A simple sysfs interface to force adapters that
+	  are detected as USB to charge as AC (1A/h) or to set
+	  custom charging currents for AC and USB.
 
 endif

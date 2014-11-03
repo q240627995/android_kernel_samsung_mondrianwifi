@@ -3727,6 +3727,8 @@ struct bif_ctrl_dev *bif_ctrl_register(struct bif_ctrl_desc *bif_desc,
 	bool slaves_present = false;
 	int rc, rid_ohm;
 
+	rc = -1;
+	
 	if (!bif_desc) {
 		pr_err("Invalid bif_desc specified\n");
 		return bdev;
