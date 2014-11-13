@@ -1271,7 +1271,7 @@ static int cpufreq_governor_smartmax(struct cpufreq_policy *new_policy,
 	unsigned int cpu = new_policy->cpu;
 	int rc;
 	struct smartmax_info_s *this_smartmax = &per_cpu(smartmax_info, cpu);
-	struct sched_param param = { .sched_priority = MAX_RT_PRIO-1 };
+	struct sched_param param = { .sched_priority = 99 };
     unsigned int latency;
 
 	switch (event) {
