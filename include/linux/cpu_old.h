@@ -19,7 +19,6 @@
 #include <linux/cpumask.h>
 
 struct device;
-struct device_node;
 
 struct cpu {
 	int node_id;		/* The node which contains the CPU */
@@ -27,30 +26,17 @@ struct cpu {
 	struct device dev;
 };
 
-struct cpu_pstate_pwr {
-	unsigned int freq;
-	uint32_t power;
-};
-
-struct cpu_pwr_stats {
-	int cpu;
-	long temp;
-	struct cpu_pstate_pwr *ptable;
-	int len;
-};
-
 extern int register_cpu(struct cpu *cpu, int num);
 extern struct device *get_cpu_device(unsigned cpu);
 extern bool cpu_is_hotpluggable(unsigned cpu);
-extern bool arch_match_cpu_phys_id(int cpu, u64 phys_id);
-extern bool arch_find_n_match_cpu_physical_id(struct device_node *cpun,
-					      int cpu, unsigned int *thread);
 
 extern int cpu_add_dev_attr(struct device_attribute *attr);
 extern void cpu_remove_dev_attr(struct device_attribute *attr);
 
 extern int cpu_add_dev_attr_group(struct attribute_group *attrs);
 extern void cpu_remove_dev_attr_group(struct attribute_group *attrs);
+
+extern int sched_create_sysfs_power_savings_entries(struct device *dev);
 
 #ifdef CONFIG_HOTPLUG_CPU
 extern void unregister_cpu(struct cpu *cpu);
@@ -89,9 +75,8 @@ enum {
 	/* migration should happen before other stuff but after perf */
 	CPU_PRI_PERF		= 20,
 	CPU_PRI_MIGRATION	= 10,
-	/* bring up workqueues before normal notifiers and down after */
-	CPU_PRI_WORKQUEUE_UP	= 5,
-	CPU_PRI_WORKQUEUE_DOWN	= -5,
+	/* prepare workqueues for other notifiers */
+	CPU_PRI_WORKQUEUE	= 5,
 };
 
 #define CPU_ONLINE		0x0002 /* CPU (unsigned)v is up */
@@ -191,12 +176,9 @@ extern struct bus_type cpu_subsys;
 
 extern void get_online_cpus(void);
 extern void put_online_cpus(void);
-extern void cpu_hotplug_disable(void);
-extern void cpu_hotplug_enable(void);
 #define hotcpu_notifier(fn, pri)	cpu_notifier(fn, pri)
 #define register_hotcpu_notifier(nb)	register_cpu_notifier(nb)
 #define unregister_hotcpu_notifier(nb)	unregister_cpu_notifier(nb)
-void clear_tasks_mm_cpumask(int cpu);
 int cpu_down(unsigned int cpu);
 
 #ifdef CONFIG_ARCH_CPU_PROBE_RELEASE
@@ -216,8 +198,6 @@ static inline void cpu_hotplug_driver_unlock(void)
 
 #define get_online_cpus()	do { } while (0)
 #define put_online_cpus()	do { } while (0)
-#define cpu_hotplug_disable()	do { } while (0)
-#define cpu_hotplug_enable()	do { } while (0)
 #define hotcpu_notifier(fn, pri)	do { (void)(fn); } while (0)
 /* These aren't inline functions due to a GCC bug. */
 #define register_hotcpu_notifier(nb)	({ (void)(nb); 0; })
@@ -232,9 +212,6 @@ static inline int disable_nonboot_cpus(void) { return 0; }
 static inline void enable_nonboot_cpus(void) {}
 #endif /* !CONFIG_PM_SLEEP_SMP */
 
-struct cpu_pwr_stats *get_cpu_pwr_stats(void);
-void trigger_cpu_pwr_stats_calc(void);
-
 #define IDLE_START 1
 #define IDLE_END 2
 
@@ -242,7 +219,4 @@ void idle_notifier_register(struct notifier_block *n);
 void idle_notifier_unregister(struct notifier_block *n);
 void idle_notifier_call_chain(unsigned long val);
 
-extern bool check_cpuboost(int cpu);
-
 #endif /* _LINUX_CPU_H_ */
- 
