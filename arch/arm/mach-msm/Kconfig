@@ -4020,5 +4020,22 @@ config FORCE_FAST_CHARGE
 	  A simple sysfs interface to force adapters that
 	  are detected as USB to charge as AC (1A/h) or to set
 	  custom charging currents for AC and USB.
+	  
+config MSM_HOTPLUG
+	bool "MSM hotplug driver"
+	depends on HOTPLUG_CPU
+	default n
+	help
+	  The MSM hotplug driver controls on-/offlining of additional cores based
+	  on current cpu load.	
+	  
+config TURBO_BOOST
+	bool "Enable CPU Turbo boost option"
+	depends on CPU_OVERCLOCK
+	default y
+	help
+	  This option allows overclocking of 2 cores to higher clock rate
+	  than stock maximum. When more than 2 cores are active, the clock
+	  is limited to stock max speeds
 
 endif
