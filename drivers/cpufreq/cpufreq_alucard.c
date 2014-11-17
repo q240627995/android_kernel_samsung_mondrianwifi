@@ -233,6 +233,37 @@ define_one_global_rw(pump_dec_step_2);
 define_one_global_rw(pump_dec_step_3);
 define_one_global_rw(pump_dec_step_4);
 
+static inline u64 get_cpu_idle_time_jiffy(unsigned int cpu, u64 *wall)
+{
+	u64 idle_time;
+	u64 cur_wall_time;
+	u64 busy_time;
+	cur_wall_time = jiffies64_to_cputime64(get_jiffies_64());
+	busy_time  = kcpustat_cpu(cpu).cpustat[CPUTIME_USER];
+	busy_time += kcpustat_cpu(cpu).cpustat[CPUTIME_SYSTEM];
+	busy_time += kcpustat_cpu(cpu).cpustat[CPUTIME_IRQ];
+	busy_time += kcpustat_cpu(cpu).cpustat[CPUTIME_SOFTIRQ];
+	busy_time += kcpustat_cpu(cpu).cpustat[CPUTIME_STEAL];
+	busy_time += kcpustat_cpu(cpu).cpustat[CPUTIME_NICE];
+
+	idle_time = cur_wall_time - busy_time;
+	if (wall)
+	*wall = jiffies_to_usecs(cur_wall_time);
+	return jiffies_to_usecs(idle_time);
+}
+
+static inline cputime64_t get_cpu_idle_time(unsigned int cpu, cputime64_t *wall)
+{
+	u64 idle_time = get_cpu_idle_time_us(cpu, NULL);
+
+	if (idle_time == -1ULL)
+		return get_cpu_idle_time_jiffy(cpu, wall);
+	else
+		idle_time += get_cpu_iowait_time_us(cpu, wall);
+
+	return idle_time;
+}
+
 /* sampling_rate */
 static ssize_t store_sampling_rate(struct kobject *a, struct attribute *b,
 				   const char *buf, size_t count)
@@ -385,7 +416,7 @@ static ssize_t store_io_is_busy(struct kobject *a, struct attribute *b,
 		j_alucard_cpuinfo = &per_cpu(od_alucard_cpuinfo, j);
 
 		j_alucard_cpuinfo->prev_cpu_idle = get_cpu_idle_time(j,
-			&j_alucard_cpuinfo->prev_cpu_wall, alucard_tuners_ins.io_is_busy);
+			&j_alucard_cpuinfo->prev_cpu_wall);
 	}
 	return count;
 }
@@ -502,7 +533,7 @@ static void alucard_check_cpu(struct cpufreq_alucard_cpuinfo *this_alucard_cpuin
 	unsigned int hi_index = 0;
 	int cur_load = -1;
 	unsigned int cpu;
-	int io_busy = alucard_tuners_ins.io_is_busy;
+	//int io_busy = alucard_tuners_ins.io_is_busy;
 	unsigned int cpus_up_rate = alucard_tuners_ins.cpus_up_rate;
 	unsigned int cpus_down_rate = alucard_tuners_ins.cpus_down_rate;
 	bool check_up = false, check_down = false;
@@ -512,7 +543,7 @@ static void alucard_check_cpu(struct cpufreq_alucard_cpuinfo *this_alucard_cpuin
 	if (cpu_policy == NULL)
 		return;
 
-	cur_idle_time = get_cpu_idle_time(cpu, &cur_wall_time, io_busy);
+	cur_idle_time = get_cpu_idle_time(cpu, &cur_wall_time);
 
 	wall_time = (unsigned int)
 			(cur_wall_time - this_alucard_cpuinfo->prev_cpu_wall);
@@ -643,7 +674,7 @@ static int cpufreq_governor_alucard(struct cpufreq_policy *policy,
 		this_alucard_cpuinfo->cpu = cpu;
 		this_alucard_cpuinfo->cur_policy = policy;
 
-		this_alucard_cpuinfo->prev_cpu_idle = get_cpu_idle_time(cpu, &this_alucard_cpuinfo->prev_cpu_wall, io_busy);
+		this_alucard_cpuinfo->prev_cpu_idle = get_cpu_idle_time(cpu, &this_alucard_cpuinfo->prev_cpu_wall);
 
 		cpufreq_frequency_table_target(policy, this_alucard_cpuinfo->freq_table, policy->min,
 			CPUFREQ_RELATION_L, &this_alucard_cpuinfo->min_index);
