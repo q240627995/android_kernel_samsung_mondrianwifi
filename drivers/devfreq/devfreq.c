@@ -89,6 +89,9 @@ static void devfreq_set_freq_limits(struct devfreq *devfreq)
 
 	devfreq->min_freq = min;
 	devfreq->max_freq = max;
+	
+	//pr_err("DEBUG(devfreq.c): MIN %ld\n", min);
+	//pr_err("DEBUG(devfreq.c): MAX %ld\n", max);
 }
 
 /**

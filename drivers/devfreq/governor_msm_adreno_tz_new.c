@@ -1,4 +1,5 @@
-/* Copyright (c) 2010-2013, The Linux Foundation. All rights reserved.
+ 
+/* Copyright (c) 2010-2014, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -34,9 +35,9 @@ static DEFINE_SPINLOCK(tz_lock);
  */
 #define MIN_BUSY		1000
 #define LONG_FLOOR		50000
-#define HIST			10 // Fluctuate less?
-#define TARGET			90
-#define CAP			85
+#define HIST			5
+#define TARGET			80
+#define CAP			75
 
 /*
  * CEILING is 50msec, larger than any standard
@@ -86,7 +87,7 @@ static void _update_cutoff(struct devfreq_msm_adreno_tz_data *priv,
 
 static int tz_get_target_freq(struct devfreq *devfreq, unsigned long *freq,
 				u32 *flag)
-{  
+{
 	int result = 0;
 	struct devfreq_msm_adreno_tz_data *priv = devfreq->data;
 	struct devfreq_dev_status stats;
@@ -95,10 +96,7 @@ static int tz_get_target_freq(struct devfreq *devfreq, unsigned long *freq,
 	int act_level;
 	int norm_cycles;
 	int gpu_percent;
-	//int i = 0;
-	
-	//pr_err(TAG "DEBUG: get target freq\n");
-	
+
 	if (priv->bus.num)
 		stats.private_data = &b;
 	else
@@ -133,8 +131,6 @@ static int tz_get_target_freq(struct devfreq *devfreq, unsigned long *freq,
 	}
 
 	level = devfreq_get_freq_level(devfreq, stats.current_frequency);
-	
-	//pr_err(TAG "DEBUG: Current level %d\n", level);
 
 	if (level < 0) {
 		pr_err(TAG "bad freq %ld\n", stats.current_frequency);
@@ -156,8 +152,6 @@ static int tz_get_target_freq(struct devfreq *devfreq, unsigned long *freq,
 	priv->bin.total_time = 0;
 	priv->bin.busy_time = 0;
 
-	//pr_err(TAG "DEBUG: Current val %d\n", val);
-	
 	/*
 	 * If the decision is to move to a different level, make sure the GPU
 	 * frequency changes.
@@ -168,8 +162,6 @@ static int tz_get_target_freq(struct devfreq *devfreq, unsigned long *freq,
 		level = min_t(int, level, devfreq->profile->max_state - 1);
 		goto clear;
 	}
-	
-	//pr_err(TAG "DEBUG: Final level %d\n", level);
 
 	if (priv->bus.total_time < LONG_FLOOR)
 		goto end;
@@ -201,29 +193,14 @@ static int tz_get_target_freq(struct devfreq *devfreq, unsigned long *freq,
 		else if (norm_cycles < priv->bus.down[act_level] && level)
 			*flag = DEVFREQ_FLAG_SLOW_HINT;
 	}
-	
-	//pr_err(TAG "DEBUG: Current val %d\n", val);
 
 clear:
 	priv->bus.total_time = 0;
 	priv->bus.gpu_time = 0;
 	priv->bus.ram_time = 0;
-	
-	/*pr_err(TAG "DEBUG: Max state %d\n", devfreq->profile->max_state);
-	
-	for (i = 0; i <= level; i++) {
-	   pr_err(TAG "DEBUG: Frequency table %d  %d\n", i,  devfreq->profile->freq_table[i]);
-	}*/
 
 end:
 	*freq = devfreq->profile->freq_table[level];
-	
-	/*pr_err(TAG "DEBUG: Max state_ %d\n",  devfreq->profile->max_state);
-	
-	for (i = 0; i <= level; i++) {
-	   pr_err(TAG "DEBUG: Frequency table %d  %d\n", i , devfreq->profile->freq_table[i]);
-	}*/
-	
 	return 0;
 }
 
@@ -250,18 +227,22 @@ static int tz_notify(struct notifier_block *nb, unsigned long type, void *devp)
 static int tz_start(struct devfreq *devfreq)
 {
 	struct devfreq_msm_adreno_tz_data *priv;
-	
 	unsigned int tz_pwrlevels[MSM_ADRENO_MAX_PWRLEVELS + 1];
 	unsigned int t1, t2 = 2 * HIST;
 	int i, out, ret;
-	
-	//pr_err(TAG "DEBUG: tz_start\n");
-	//pr_err(TAG "DEBUG: MAX_POWERLEVELS %d\n", MSM_ADRENO_MAX_PWRLEVELS);
 
-        if (devfreq->data == NULL) {
-                pr_err(TAG "data is required for this governor\n");
-                return -EINVAL;
-        }
+	struct msm_adreno_extended_profile *ext_profile = container_of(
+					(devfreq->profile),
+					struct msm_adreno_extended_profile,
+					profile);
+
+	/*
+	 * Assuming that we have only one instance of the adreno device
+	 * connected to this governor,
+	 * can safely restore the pointer to the governor private data
+	 * from the container of the device profile
+	 */
+	devfreq->data = ext_profile->private_data;
 
 	priv = devfreq->data;
 	priv->nb.notifier_call = tz_notify;

@@ -2,6 +2,7 @@
 #define MSM_ADRENO_DEVFREQ_H
 
 #include <linux/notifier.h>
+#include <linux/devfreq.h>
 
 #define ADRENO_DEVFREQ_NOTIFY_SUBMIT	1
 #define ADRENO_DEVFREQ_NOTIFY_RETIRE	2
@@ -42,6 +43,11 @@ struct devfreq_msm_adreno_tz_data {
 		uint64_t *ib;
 	} bus;
 	unsigned int device_id;
+};
+
+struct msm_adreno_extended_profile {
+	struct devfreq_msm_adreno_tz_data *private_data;
+	struct devfreq_dev_profile profile;
 };
 
 #endif
