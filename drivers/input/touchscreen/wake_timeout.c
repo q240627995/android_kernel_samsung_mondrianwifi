@@ -16,7 +16,7 @@
 
 #include <linux/module.h>
 #include <linux/device.h>
-#include <linux/lcd_notify.h>
+//#include <linux/lcd_notify.h>
 #include <linux/android_alarm.h>
 #include <linux/qpnp/power-on.h>
 #include <linux/input.h>

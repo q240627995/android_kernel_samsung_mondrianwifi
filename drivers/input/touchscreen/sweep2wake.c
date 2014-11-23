@@ -33,11 +33,6 @@
 #include <linux/slab.h>
 #include <linux/workqueue.h>
 #include <linux/input.h>
-#ifndef CONFIG_HAS_EARLYSUSPEND
-#include <linux/lcd_notify.h>
-#else
-#include <linux/earlysuspend.h>
-#endif
 #include <linux/hrtimer.h>
 
 /* uncomment since no touchscreen defines android touch, do that here */
@@ -70,11 +65,13 @@ MODULE_LICENSE("GPLv2");
 #define S2W_Y_NEXT              180
 #else
 /* defaults */
-#define S2W_Y_LIMIT             2350
-#define S2W_X_MAX               1540
-#define S2W_X_B1                500
-#define S2W_X_B2                1000
-#define S2W_X_FINAL             300
+#define S2W_Y_MAX               2560
+#define S2W_X_MAX               1600
+#define S2W_Y_LIMIT             S2W_Y_MAX-130
+#define S2W_X_B1                800
+#define S2W_X_B2                1200
+#define S2W_X_FINAL             400
+#define S2W_Y_NEXT              320
 #endif
 
 /* Wake Gestures */
@@ -104,9 +101,6 @@ static bool barrierx[2] = {false, false}, barriery[2] = {false, false};
 static int firstx = 0, firsty = 0;
 static unsigned long firstx_time = 0, firsty_time = 0;
 static unsigned long pwrtrigger_time[2] = {0, 0};
-#ifndef CONFIG_HAS_EARLYSUSPEND
-static struct notifier_block s2w_lcd_notif;
-#endif
 static struct input_dev * sweep2wake_pwrdev;
 static DEFINE_MUTEX(pwrkeyworklock);
 static struct workqueue_struct *s2w_input_wq;
@@ -213,7 +207,7 @@ static void detect_sweep2wake_v(int x, int y, bool st)
 						if (y < (nexty - S2W_Y_NEXT)) {
 							if (exec_county && (jiffies - firsty_time < SWEEP_TIMEOUT)) {
 								pr_debug(LOGTAG"sweep up\n");
-								set_vibrate(vib_strength);
+								//set_vibrate(vib_strength);
 								if (gestures_switch) {
 									report_gesture(3);
 								} else {
@@ -240,7 +234,7 @@ static void detect_sweep2wake_v(int x, int y, bool st)
 						if (y > (nexty + S2W_Y_NEXT)) {
 							if (exec_county && (jiffies - firsty_time < SWEEP_TIMEOUT)) {
 								pr_debug(LOGTAG"sweep down\n");
-								set_vibrate(vib_strength);
+								//set_vibrate(vib_strength);
 								if (gestures_switch) {
 									report_gesture(4);
 								} else {
@@ -292,7 +286,7 @@ static void detect_sweep2wake_h(int x, int y, bool st, bool wake)
 					if (x > (S2W_X_MAX - S2W_X_FINAL)) {
 						if (exec_countx && (jiffies - firstx_time < SWEEP_TIMEOUT)) {
 							pr_debug(LOGTAG"sweep right\n");
-							set_vibrate(vib_strength);
+							//set_vibrate(vib_strength);
 							if (gestures_switch && wake) {
 								report_gesture(1);
 							} else {
@@ -322,7 +316,7 @@ static void detect_sweep2wake_h(int x, int y, bool st, bool wake)
 					if (x < S2W_X_FINAL) {
 						if (exec_countx) {
 							pr_debug(LOGTAG"sweep left\n");
-							set_vibrate(vib_strength);
+							//set_vibrate(vib_strength);
 							if (gestures_switch && wake) {
 								report_gesture(2);
 							} else {
@@ -444,39 +438,6 @@ static struct input_handler s2w_input_handler = {
 	.name		= "s2w_inputreq",
 	.id_table	= s2w_ids,
 };
-
-#ifndef CONFIG_HAS_EARLYSUSPEND
-static int lcd_notifier_callback(struct notifier_block *this,
-				unsigned long event, void *data)
-{
-	switch (event) {
-	case LCD_EVENT_ON_END:
-		scr_suspended = false;
-		break;
-	case LCD_EVENT_OFF_END:
-		scr_suspended = true;
-		break;
-	default:
-		break;
-	}
-
-	return 0;
-}
-#else
-static void s2w_early_suspend(struct early_suspend *h) {
-	scr_suspended = true;
-}
-
-static void s2w_late_resume(struct early_suspend *h) {
-	scr_suspended = false;
-}
-
-static struct early_suspend s2w_early_suspend_handler = {
-	.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN,
-	.suspend = s2w_early_suspend,
-	.resume = s2w_late_resume,
-};
-#endif
 
 /*
  * SYSFS stuff below here
@@ -643,15 +604,6 @@ static int __init sweep2wake_init(void)
 	}
 	gestures_setdev(gesture_dev);
 
-#ifndef CONFIG_HAS_EARLYSUSPEND
-	s2w_lcd_notif.notifier_call = lcd_notifier_callback;
-	if (lcd_register_client(&s2w_lcd_notif) != 0) {
-		pr_err("%s: Failed to register lcd callback\n", __func__);
-	}
-#else
-	register_early_suspend(&s2w_early_suspend_handler);
-#endif
-
 #ifndef ANDROID_TOUCH_DECLARED
 	android_touch_kobj = kobject_create_and_add("android_touch", NULL) ;
 	if (android_touch_kobj == NULL) {
@@ -691,9 +643,6 @@ static void __exit sweep2wake_exit(void)
 {
 #ifndef ANDROID_TOUCH_DECLARED
 	kobject_del(android_touch_kobj);
-#endif
-#ifndef CONFIG_HAS_EARLYSUSPEND
-	lcd_unregister_client(&s2w_lcd_notif);
 #endif
 	input_unregister_handler(&s2w_input_handler);
 	destroy_workqueue(s2w_input_wq);
