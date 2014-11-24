@@ -16,7 +16,7 @@
 
 #include <linux/module.h>
 #include <linux/device.h>
-//#include <linux/lcd_notify.h>
+#include <linux/lcd_notify.h>
 #include <linux/android_alarm.h>
 #include <linux/qpnp/power-on.h>
 #include <linux/input.h>
@@ -88,12 +88,12 @@ static void wakefunc_rtc_start(void)
 			(wake_timeout * 1000LL * 60000LL));
 	alarm_start_range(&wakefunc_rtc, wakeup_time,
 			wakeup_time);
-	pr_debug("%s: Current Time: %ld, Alarm set to: %ld\n",
+	pr_info("%s: Current Time: %ld, Alarm set to: %ld\n",
 			WAKEFUNC,
 			ktime_to_timeval(curr_time).tv_sec,
 			ktime_to_timeval(wakeup_time).tv_sec);
 		
-	pr_debug("%s: Timeout started for %llu minutes\n", WAKEFUNC,
+	pr_info("%s: Timeout started for %llu minutes\n", WAKEFUNC,
 			wake_timeout);
 }
 
@@ -104,9 +104,9 @@ static void wakefunc_rtc_cancel(void)
 	wakefunc_triggered = false;
 	ret = alarm_cancel(&wakefunc_rtc);
 	if (ret)
-		pr_debug("%s: Timeout canceled\n", WAKEFUNC);
+		pr_info("%s: Timeout canceled\n", WAKEFUNC);
 	else
-		pr_debug("%s: Nothing to cancel\n",
+		pr_info("%s: Nothing to cancel\n",
 				WAKEFUNC);
 }
 
@@ -187,7 +187,7 @@ static int __init wake_timeout_init(void)
 {
 	int rc;
 
-	pr_debug("wake_timeout version %d.%d\n",
+	pr_info("wake_timeout version %d.%d\n",
 		 WAKE_TIMEOUT_MAJOR_VERSION,
 		 WAKE_TIMEOUT_MINOR_VERSION);
 
@@ -229,7 +229,7 @@ static int __init wake_timeout_init(void)
 err_input_dev:
 	input_free_device(wake_pwrdev);
 err_alloc_dev:
-	pr_debug(WAKEFUNC"%s: done\n", __func__);
+	pr_info(WAKEFUNC"%s: done\n", __func__);
 
 	return 0;
 }

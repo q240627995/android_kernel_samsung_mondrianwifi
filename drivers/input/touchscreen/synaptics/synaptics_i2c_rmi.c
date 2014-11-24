@@ -38,6 +38,15 @@
 #define SYNAPTICS_PM_GPIO_STATE_WAKE	0
 #define SYNAPTICS_PM_GPIO_STATE_SLEEP	1
 
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+#ifdef CONFIG_TOUCHSCREEN_SWEEP2WAKE
+#include <linux/input/sweep2wake.h>
+#endif
+#ifdef CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE
+#include <linux/input/doubletap2wake.h>
+#endif
+#endif
+
 struct qpnp_pin_cfg synaptics_int_set[] = {
 	{
 		.mode = 0,
@@ -2385,7 +2394,12 @@ static int synaptics_rmi4_irq_enable(struct synaptics_rmi4_data *rmi4_data,
 		}
 
 		retval = request_threaded_irq(rmi4_data->irq, NULL,
-				synaptics_rmi4_irq, IRQF_TRIGGER_FALLING,
+				synaptics_rmi4_irq,
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+			IRQF_TRIGGER_FALLING | IRQF_NO_SUSPEND,
+#else
+			IRQF_TRIGGER_FALLING,
+#endif
 				DRIVER_NAME, rmi4_data);
 		if (retval < 0) {
 			dev_err(&rmi4_data->i2c_client->dev,
@@ -5419,6 +5433,18 @@ static void synaptics_rmi4_sensor_wake(struct synaptics_rmi4_data *rmi4_data)
 
 static int synaptics_rmi4_stop_device(struct synaptics_rmi4_data *rmi4_data)
 {
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+#if defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE) || defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
+	bool prevent_sleep = false;
+#endif
+#if defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE)
+	prevent_sleep = (s2w_switch > 0);
+#endif
+#if defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
+	prevent_sleep = prevent_sleep || (dt2w_switch > 0);
+#endif
+#endif  
+  
 	mutex_lock(&rmi4_data->rmi4_device_mutex);
 
 	if (rmi4_data->touch_stopped) {
@@ -5427,12 +5453,21 @@ static int synaptics_rmi4_stop_device(struct synaptics_rmi4_data *rmi4_data)
 		goto out;
 	}
 
-	disable_irq(rmi4_data->i2c_client->irq);
-	synaptics_rmi4_free_fingers(rmi4_data);
-	rmi4_data->touch_stopped = true;
-	synaptics_power_ctrl(rmi4_data,false);
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+	if (!prevent_sleep)
+#endif
+	{
+		disable_irq(rmi4_data->i2c_client->irq);
+		synaptics_rmi4_free_fingers(rmi4_data);
+		rmi4_data->touch_stopped = true;
+		synaptics_power_ctrl(rmi4_data,false);
 
-	dev_dbg(&rmi4_data->i2c_client->dev, "%s\n", __func__);
+		dev_dbg(&rmi4_data->i2c_client->dev, "%s\n", __func__);
+	}
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+	if (prevent_sleep)
+		enable_irq_wake(rmi4_data->i2c_client->irq);
+#endif
 
 out:
 	mutex_unlock(&rmi4_data->rmi4_device_mutex);
@@ -5442,7 +5477,21 @@ out:
 static int synaptics_rmi4_start_device(struct synaptics_rmi4_data *rmi4_data)
 {
 	int retval = 0;
+	
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+#if defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE) || defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
+	bool prevent_sleep = false;
+#endif
+#if defined(CONFIG_TOUCHSCREEN_SWEEP2WAKE)
+	prevent_sleep = (s2w_switch > 0);
+#endif
+#if defined(CONFIG_TOUCHSCREEN_DOUBLETAP2WAKE)
+	prevent_sleep = prevent_sleep || (dt2w_switch > 0);
+#endif
+#endif
+	
 	mutex_lock(&rmi4_data->rmi4_device_mutex);
+	
 
 	if (!rmi4_data->touch_stopped) {
 		dev_err(&rmi4_data->i2c_client->dev, "%s already power on\n",
@@ -5483,6 +5532,12 @@ static int synaptics_rmi4_start_device(struct synaptics_rmi4_data *rmi4_data)
 
 out:
 	mutex_unlock(&rmi4_data->rmi4_device_mutex);
+	
+#ifdef CONFIG_TOUCHSCREEN_PREVENT_SLEEP
+	if (prevent_sleep)
+		disable_irq_wake(rmi4_data->i2c_client->irq);
+#endif
+	
 	return retval;
 }
 
