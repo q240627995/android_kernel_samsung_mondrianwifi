@@ -98,6 +98,37 @@ struct runqueue_data {
 
 static struct runqueue_data *rq_data;
 
+static inline u64 get_cpu_idle_time_jiffy(unsigned int cpu, u64 *wall)
+{
+	u64 idle_time;
+	u64 cur_wall_time;
+	u64 busy_time;
+	cur_wall_time = jiffies64_to_cputime64(get_jiffies_64());
+	busy_time  = kcpustat_cpu(cpu).cpustat[CPUTIME_USER];
+	busy_time += kcpustat_cpu(cpu).cpustat[CPUTIME_SYSTEM];
+	busy_time += kcpustat_cpu(cpu).cpustat[CPUTIME_IRQ];
+	busy_time += kcpustat_cpu(cpu).cpustat[CPUTIME_SOFTIRQ];
+	busy_time += kcpustat_cpu(cpu).cpustat[CPUTIME_STEAL];
+	busy_time += kcpustat_cpu(cpu).cpustat[CPUTIME_NICE];
+
+	idle_time = cur_wall_time - busy_time;
+	if (wall)
+	*wall = jiffies_to_usecs(cur_wall_time);
+	return jiffies_to_usecs(idle_time);
+}
+
+static inline cputime64_t get_cpu_idle_time(unsigned int cpu, cputime64_t *wall)
+{
+	u64 idle_time = get_cpu_idle_time_us(cpu, NULL);
+
+	if (idle_time == -1ULL)
+		return get_cpu_idle_time_jiffy(cpu, wall);
+	else
+		idle_time += get_cpu_iowait_time_us(cpu, wall);
+
+	return idle_time;
+}
+
 static void init_rq_avg_stats(void)
 {
 	rq_data->nr_run_avg = 0;
@@ -177,7 +208,6 @@ static void __ref hotplug_work_fn(struct work_struct *work)
 #endif
 	HOTPLUG_STATUS hotplug_onoff[NR_CPUS] = {IDLE, IDLE, IDLE, IDLE};
 	int delay;
-	int io_busy = hotplug_tuners_ins.hp_io_is_busy;
 
 	rq_avg = get_nr_run_avg();
 
@@ -205,7 +235,7 @@ static void __ref hotplug_work_fn(struct work_struct *work)
 #ifdef CONFIG_ALUCARD_HOTPLUG_USE_CPU_UTIL
 		cur_load = cpufreq_quick_get_util(cpu);
 #else
-		cur_idle_time = get_cpu_idle_time(cpu, &cur_wall_time, io_busy);
+		cur_idle_time = get_cpu_idle_time(cpu, &cur_wall_time);
 
 		wall_time = (unsigned int)
 				(cur_wall_time -
@@ -408,7 +438,7 @@ static int hotplug_start(void)
 
 #ifndef CONFIG_ALUCARD_HOTPLUG_USE_CPU_UTIL
 		pcpu_info->prev_cpu_idle = get_cpu_idle_time(cpu,
-				&pcpu_info->prev_cpu_wall, hotplug_tuners_ins.hp_io_is_busy);
+				&pcpu_info->prev_cpu_wall);
 #endif
 		pcpu_info->cur_up_rate = 1;
 		pcpu_info->cur_down_rate = 1;
@@ -737,7 +767,7 @@ static ssize_t store_hp_io_is_busy(struct kobject *a, struct attribute *b,
 		for_each_online_cpu(j) {
 			struct hotplug_cpuinfo *pcpu_info = &per_cpu(od_hotplug_cpuinfo, j);
 			pcpu_info->prev_cpu_idle = get_cpu_idle_time(j,
-					&pcpu_info->prev_cpu_wall, hotplug_tuners_ins.hp_io_is_busy);
+					&pcpu_info->prev_cpu_wall);
 		}
 	}
 #endif
