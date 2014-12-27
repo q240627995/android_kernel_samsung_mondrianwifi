@@ -3988,6 +3988,7 @@ config KRAIT_REGULATOR
 	 regulators running in ganged mode inside the PMIC. Enable
 	 this option to support such configurations.
 
+
 config EXTEND_SERIAL_NUM_16
 	bool "serial number is 16 digit"
 	default n
@@ -4030,7 +4031,6 @@ config INTELLI_HOTPLUG
 	help
 	  An intelligent cpu hotplug driver for
 	  Low Latency Frequency Transition capable processors.
-endif
 
 config MSM_HOTPLUG
 	bool "MSM hotplug driver"
@@ -4039,3 +4039,13 @@ config MSM_HOTPLUG
 	help
 	  The MSM hotplug driver controls on-/offlining of additional cores based
 	  on current cpu load.
+
+config BRICKED_HOTPLUG
+	bool "Enable kernel based mpdecision"
+	depends on MSM_RUN_QUEUE_STATS
+	default n
+	help
+	  This enables kernel based multi core control.
+	  (up/down hotplug based on load)
+
+endif
