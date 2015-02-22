@@ -37,6 +37,19 @@ static char klog_buf[256];
 #define CONFIG_LOGCAT_SIZE 256
 #endif
 
+static unsigned int log_enabled = 1;
+static unsigned int log_always_on = 0;
+
+module_param(log_enabled, uint, S_IWUSR | S_IRUGO);
+module_param(log_always_on, uint, S_IWUSR | S_IRUGO);
+
+static DEFINE_SPINLOCK(log_lock);
+static struct work_struct write_console_wq;
+static struct tasklet_struct schedule_work_tasklet;
+
+static unsigned int log_enabled = 1;
+module_param(log_enabled, uint, S_IWUSR | S_IRUGO);
+
 /*
  * struct logger_log - represents a specific log, such as 'main' or 'radio'
  *
@@ -469,6 +482,9 @@ ssize_t logger_aio_write(struct kiocb *iocb, const struct iovec *iov,
 	struct logger_entry header;
 	struct timespec now;
 	ssize_t ret = 0;
+
+	if (!log_enabled)
+		return 0;
 
 	now = current_kernel_time();
 
