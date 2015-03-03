@@ -45,6 +45,9 @@
 #define INIT_UDELAY		200
 #define MAX_UDELAY		2000
 
+#ifdef CONFIG_CPU_FREQ_GOV_ELEMENTALX
+int graphics_boost = 6;
+#endif
 struct clk_pair {
 	const char *name;
 	uint map;
@@ -149,6 +152,7 @@ void kgsl_pwrctrl_buslevel_update(struct kgsl_device *device,
 	}
 	msm_bus_scale_client_update_request(pwr->pcl, buslevel);
 	trace_kgsl_pwrlevel(device, pwr->active_pwrlevel, buslevel);
+
 }
 EXPORT_SYMBOL(kgsl_pwrctrl_buslevel_update);
 
@@ -213,6 +217,10 @@ void kgsl_pwrctrl_pwrlevel_change(struct kgsl_device *device,
 
 
 	trace_kgsl_pwrlevel(device, pwr->active_pwrlevel, pwrlevel->gpu_freq);
+
+#ifdef CONFIG_CPU_FREQ_GOV_ELEMENTALX
+        graphics_boost = pwr->active_pwrlevel;
+#endif
 }
 
 EXPORT_SYMBOL(kgsl_pwrctrl_pwrlevel_change);
