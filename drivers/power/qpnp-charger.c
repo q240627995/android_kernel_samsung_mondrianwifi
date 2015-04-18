@@ -41,8 +41,10 @@
 #include "linux/charge_level.h"
 int ac_level = AC_CHARGE_LEVEL_DEFAULT;    // Set AC default charge level
 int usb_level  = USB_CHARGE_LEVEL_DEFAULT; // Set USB default charge level
-char charge_info_text[30];
-int charge_info_level;
+int charge_info_level_req = 0;	// requested charge current
+int charge_info_level_cur = 0;	// current charge current
+int charge_level = 0;			// 0 = stock charge logic, not 0 = current to set
+char charge_info_text[30] = "No charger";
 #endif
 
 /* Interrupt offsets */
@@ -919,7 +921,6 @@ qpnp_chg_iusbmax_set(struct qpnp_chg_chip *chip, int mA)
 	}
 
 	pr_debug("current=%d setting 0x%x\n", mA, usb_reg);
-
 	rc = qpnp_chg_write(chip, &usb_reg,
 		chip->usb_chgpth_base + CHGR_I_MAX_REG, 1);
 
@@ -5159,11 +5160,6 @@ static struct spmi_driver qpnp_charger_driver = {
 int __init
 qpnp_chg_init(void)
 {
-#ifdef CONFIG_CHARGE_LEVEL
-	// initialize charge info variables
-	charge_info_level = 0;
-	sprintf(charge_info_text, "No charger");
-#endif
 	return spmi_driver_register(&qpnp_charger_driver);
 }
 module_init(qpnp_chg_init);
