@@ -437,6 +437,16 @@ static struct notifier_block __refdata cpu_nblk = {
         .notifier_call = cpuboost_cpu_callback,
 };
 
+bool check_cpuboost(int cpu)
+{
+	struct cpu_sync *i_sync_info;
+	i_sync_info = &per_cpu(sync_info, cpu);
+
+	if (i_sync_info->input_boost_min > 0)
+		return true;
+	return false;
+}
+
 static int cpu_boost_init(void)
 {
 	int cpu, ret;
