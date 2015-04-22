@@ -1108,4 +1108,8 @@ source "drivers/input/touchscreen/synaptics_s5000/Kconfig"
 source "drivers/input/touchscreen/cyttsp5/Kconfig"
 source "drivers/input/touchscreen/wacom_hl/Kconfig"
 
+config STATE_NOTIFIER
+	bool "State Notifier"
+	default y
+
 endif
