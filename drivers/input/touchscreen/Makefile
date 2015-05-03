@@ -92,3 +92,4 @@ obj-$(CONFIG_TOUCHSCREEN_IST30XX) += imagis/
 obj-$(CONFIG_TOUCHSCREEN_FTS) += fts_ts.o fts_fwu.o
 obj-$(CONFIG_INPUT_WACOM_HL) += wacom_hl/
 obj-$(CONFIG_STATE_NOTIFIER)		+= state_notifier.o
+obj-y += touchboost.o
