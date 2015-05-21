@@ -61,14 +61,14 @@
 		status = "okay";
 		pm8841_s1: regulator-s1 {
 			regulator-min-microvolt = <675000>;
-			regulator-max-microvolt = <1150000>;
+			regulator-max-microvolt = <1050000>;
 			status = "okay";
 		};
 		pm8841_s1_ao: regulator-s1-ao {
 			regulator-name = "8841_s1_ao";
 			qcom,set = <1>;
 			regulator-min-microvolt = <675000>;
-			regulator-max-microvolt = <1150000>;
+			regulator-max-microvolt = <1050000>;
 			status = "okay";
 			compatible = "qcom,rpm-regulator-smd";
 		};
@@ -76,7 +76,7 @@
 			regulator-name = "8841_s1_so";
 			qcom,set = <2>;
 			regulator-min-microvolt = <675000>;
-			regulator-max-microvolt = <1150000>;
+			regulator-max-microvolt = <1050000>;
 			qcom,init-voltage = <675000>;
 			status = "okay";
 			compatible = "qcom,rpm-regulator-smd";
@@ -87,7 +87,7 @@
 		status = "okay";
 		pm8841_s2: regulator-s2 {
 			regulator-min-microvolt = <500000>;
-			regulator-max-microvolt = <1150000>;
+			regulator-max-microvolt = <1050000>;
 			status = "okay";
 		};
 		pm8841_s2_corner: regulator-s2-corner {
@@ -474,7 +474,7 @@
 				<0xf908a800 0x1000>; /* APCS_ALIAS0_KPSS_MDD */
 			reg-names = "acs", "mdd";
 			regulator-min-microvolt = <500000>;
-			regulator-max-microvolt = <1150000>;
+			regulator-max-microvolt = <1100000>;
 			qcom,headroom-voltage = <150000>;
 			qcom,retention-voltage = <675000>;
 			qcom,ldo-default-voltage = <750000>;
@@ -490,7 +490,7 @@
 				<0xf909a800 0x1000>; /* APCS_ALIAS1_KPSS_MDD */
 			reg-names = "acs", "mdd";
 			regulator-min-microvolt = <500000>;
-			regulator-max-microvolt = <1150000>;
+			regulator-max-microvolt = <1100000>;
 			qcom,headroom-voltage = <150000>;
 			qcom,retention-voltage = <675000>;
 			qcom,ldo-default-voltage = <750000>;
@@ -506,7 +506,7 @@
 				<0xf90aa800 0x1000>; /* APCS_ALIAS2_KPSS_MDD */
 			reg-names = "acs", "mdd";
 			regulator-min-microvolt = <500000>;
-			regulator-max-microvolt = <1150000>;
+			regulator-max-microvolt = <1100000>;
 			qcom,headroom-voltage = <150000>;
 			qcom,retention-voltage = <675000>;
 			qcom,ldo-default-voltage = <750000>;
@@ -522,7 +522,7 @@
 				<0xf90ba800 0x1000>; /* APCS_ALIAS3_KPSS_MDD */
 			reg-names = "acs", "mdd";
 			regulator-min-microvolt = <500000>;
-			regulator-max-microvolt = <1150000>;
+			regulator-max-microvolt = <1100000>;
 			qcom,headroom-voltage = <150000>;
 			qcom,retention-voltage = <675000>;
 			qcom,ldo-default-voltage = <750000>;
