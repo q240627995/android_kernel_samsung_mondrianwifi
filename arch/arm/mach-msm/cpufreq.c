@@ -543,6 +543,7 @@ static struct cpufreq_driver msm_cpufreq_driver = {
 static int cpufreq_parse_dt(struct device *dev)
 {
 	int ret, len, nf, num_cols = 2, i, j, kk;
+        
 	u32 *data;
 
 	if (l2_clk)
@@ -634,7 +635,7 @@ static int cpufreq_parse_dt(struct device *dev)
 			GFP_KERNEL);
 
 	if (!dts_freq_table)
-		return ERR_PTR(-ENOMEM);
+		return -ENOMEM;
 
 	for (i = 0, kk = 0; i < nf; i++, kk += 3)
 		dts_freq_table[i].frequency = data[kk];
