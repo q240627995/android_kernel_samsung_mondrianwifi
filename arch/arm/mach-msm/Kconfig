@@ -4022,6 +4022,5 @@ config MSM_LIMITER
 	help
 	  The MSM Frequency Limiter Driver controls max frequency limit for each CPU
 
-
 endif	 
          
