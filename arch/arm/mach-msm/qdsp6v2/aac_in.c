@@ -168,6 +168,7 @@ static long aac_in_ioctl(struct file *file,
 	case AUDIO_SET_AAC_ENC_CONFIG: {
 		struct msm_audio_aac_enc_config cfg;
 		struct msm_audio_aac_enc_config *enc_cfg;
+                uint32_t min_bitrate, max_bitrate;
 		enc_cfg = audio->enc_cfg;
 		if (copy_from_user(&cfg, (void *)arg, sizeof(cfg))) {
 			rc = -EFAULT;
