@@ -47,16 +47,16 @@ static struct work_struct input_boost_work;
 static unsigned int cpu_boost = 1;
 module_param(cpu_boost, uint, 0644);
 
-static unsigned int boost_ms;
+static unsigned int boost_ms = 20;
 module_param(boost_ms, uint, 0644);
 
-static unsigned int sync_threshold;
+static unsigned int sync_threshold = 1267;
 module_param(sync_threshold, uint, 0644);
 
-static unsigned int input_boost_freq;
+static unsigned int input_boost_freq = 1190;
 module_param(input_boost_freq, uint, 0644);
 
-static unsigned int input_boost_ms = 40;
+static unsigned int input_boost_ms = 100;
 module_param(input_boost_ms, uint, 0644);
 
 static u64 last_input_time;
