@@ -5,9 +5,9 @@
 #if defined(CONFIG_MACH_OPPO_MSM8974)
 #define DEFAULT_RESUME_FREQUENCY	2457600
 #else
-#define DEFAULT_RESUME_FREQUENCY	2265600
+#define DEFAULT_RESUME_FREQUENCY	2457600
 #endif
-#define DEFAULT_MIN_FREQUENCY		300000
+#define DEFAULT_MIN_FREQUENCY		268000
 
 static struct cpu_limit {
 	unsigned int limiter_enabled;
