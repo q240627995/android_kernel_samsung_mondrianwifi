@@ -7,7 +7,7 @@
 #else
 #define DEFAULT_RESUME_FREQUENCY	2457600
 #endif
-#define DEFAULT_MIN_FREQUENCY		268000
+#define DEFAULT_MIN_FREQUENCY		268800
 
 static struct cpu_limit {
 	unsigned int limiter_enabled;
