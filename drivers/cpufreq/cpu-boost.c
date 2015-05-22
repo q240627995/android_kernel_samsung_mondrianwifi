@@ -155,7 +155,7 @@ static void do_input_boost_rem(struct work_struct *work)
 
 static int boost_mig_sync_thread(void *data)
 {
-	int dest_cpu = cpu;
+	int dest_cpu = (int)data;
 	int src_cpu, ret;
 	struct cpu_sync *s = &per_cpu(sync_info, dest_cpu);
 	struct cpufreq_policy dest_policy;
@@ -441,6 +441,21 @@ static int cpu_boost_init(void)
 	atomic_notifier_chain_register(&migration_notifier_head,
 					&boost_migration_nb);
 	ret = input_register_handler(&cpuboost_input_handler);
+        
+        	ret = input_register_handler(&cpuboost_input_handler);
+	if (ret)
+		pr_err("Cannot register cpuboost input handler.\n");
+
+	ret = register_hotcpu_notifier(&cpu_nblk);
+	if (ret)
+		pr_err("Cannot register cpuboost hotplug handler.\n");
+
+#ifdef CONFIG_LCD_NOTIFY
+	notif.notifier_call = lcd_notifier_callback;
+	ret = lcd_register_client(&notif);
+        if (ret != 0)
+                pr_err("Failed to register hotplug LCD notifier callback.\n");
+#endif
 
 	return ret;
 }
