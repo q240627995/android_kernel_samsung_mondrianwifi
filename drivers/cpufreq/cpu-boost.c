@@ -155,13 +155,6 @@ static void do_input_boost_rem(struct work_struct *work)
 
 static int boost_mig_sync_thread(void *data)
 {
-	struct cpu_sync *s = &per_cpu(sync_info, cpu);
-
-	return s->pending;
-}
-
-static void run_boost_migration(unsigned int cpu)
-{
 	int dest_cpu = cpu;
 	int src_cpu, ret;
 	struct cpu_sync *s = &per_cpu(sync_info, dest_cpu);
