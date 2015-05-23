@@ -5,11 +5,7 @@
  * Copyright (C) 2003 Jens Axboe <axboe@kernel.dk>
  *
  * Copyright (C) 2008 Fabio Checconi <fabio@gandalf.sssup.it>
-<<<<<<< HEAD
  *		      Paolo Valente <paolo.valente@unimore.it>
-=======
- *                      Paolo Valente <paolo.valente@unimore.it>
->>>>>>> 4ebce51... Add BFQ/SIO/FIOPS/ZEN/VR IO Schedulers
  *
  * Copyright (C) 2010 Paolo Valente <paolo.valente@unimore.it>
  */
@@ -20,13 +16,8 @@
  */
 static inline struct bfq_io_cq *icq_to_bic(struct io_cq *icq)
 {
-<<<<<<< HEAD
 	/* bic->icq is the first member, %NULL will convert to %NULL */
 	return container_of(icq, struct bfq_io_cq, icq);
-=======
-        /* bic->icq is the first member, %NULL will convert to %NULL */
-        return container_of(icq, struct bfq_io_cq, icq);
->>>>>>> 4ebce51... Add BFQ/SIO/FIOPS/ZEN/VR IO Schedulers
 }
 
 /**
@@ -37,17 +28,9 @@ static inline struct bfq_io_cq *icq_to_bic(struct io_cq *icq)
  * Queue lock must be held.
  */
 static inline struct bfq_io_cq *bfq_bic_lookup(struct bfq_data *bfqd,
-<<<<<<< HEAD
 					       struct io_context *ioc)
 {
 	if (ioc)
 		return icq_to_bic(ioc_lookup_icq(ioc, bfqd->queue));
 	return NULL;
-=======
-                                               struct io_context *ioc)
-{
-        if(ioc)
-                return icq_to_bic(ioc_lookup_icq(ioc, bfqd->queue));
-        return NULL;
->>>>>>> 4ebce51... Add BFQ/SIO/FIOPS/ZEN/VR IO Schedulers
 }
