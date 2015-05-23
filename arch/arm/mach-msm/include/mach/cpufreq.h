@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-/*
- * Copyright (c) 2013 The Linux Foundation. All rights reserved.
-=======
 /* Copyright (c) 2012, The Linux Foundation. All rights reserved.
->>>>>>> 5195904... Bricked Thermal: Initial Port for OPO
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -14,35 +9,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-<<<<<<< HEAD
-#ifndef __MACH_CPUFREQ_H
-#define __MACH_CPUFREQ_H
-
-#if defined(CONFIG_DEVFREQ_GOV_MSM_CPUFREQ)
-extern int devfreq_msm_cpufreq_update_bw(void);
-extern int register_devfreq_msm_cpufreq(void);
-#else
-static int devfreq_msm_cpufreq_update_bw(void)
-{
-	return 0;
-}
-static int register_devfreq_msm_cpufreq(void)
-{
-	return 0;
-}
-#endif
-
-#if defined(CONFIG_CPU_FREQ_MSM)
-extern unsigned long msm_cpufreq_get_bw(void);
-#else
-extern unsigned long msm_cpufreq_get_bw(void)
-{
-	return ULONG_MAX;
-}
-#endif
-
-#endif
-=======
 
 #ifndef __ARCH_ARM_MACH_MSM_MACH_CPUFREQ_H
 #define __ARCH_ARM_MACH_MSM_MACH_CPUFREQ_H
@@ -74,4 +40,3 @@ static inline int msm_cpufreq_set_freq_limits(
 #endif
 
 #endif /* __ARCH_ARM_MACH_MSM_MACH_CPUFREQ_H */
->>>>>>> 5195904... Bricked Thermal: Initial Port for OPO

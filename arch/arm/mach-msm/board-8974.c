@@ -408,6 +408,26 @@ static void samsung_sys_class_init(void)
 					
 };
 
+#ifdef CONFIG_BRICKED_THERMAL
+static struct msm_thermal_data msm_thermal_pdata = {
+	.sensor_id = 0,
+	.poll_ms = 400,
+	.shutdown_temp = 90,
+
+	.allowed_max_high = 89,
+	.allowed_max_low = 84,
+	.allowed_max_freq = 499200,
+
+	.allowed_mid_high = 83,
+	.allowed_mid_low = 77,
+	.allowed_mid_freq = 1113600,
+
+	.allowed_low_high = 76,
+	.allowed_low_low = 70,
+	.allowed_low_freq = 1651200,
+};
+#endif
+
 /*
  * Used to satisfy dependencies for devices that need to be
  * run early or in a particular order. Most likely your device doesn't fall
@@ -429,7 +449,11 @@ void __init msm8974_add_drivers(void)
 	else
 		msm_clock_init(&msm8974_clock_init_data);
 	tsens_tm_init_driver();
-	msm_thermal_device_init();
+#ifdef CONFIG_BRICKED_THERMAL
+	msm_thermal_init(&msm_thermal_pdata);
+#else
+ 	msm_thermal_device_init();
+#endif
 }
 
 static struct of_dev_auxdata msm_hsic_host_adata[] = {
