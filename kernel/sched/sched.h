@@ -523,7 +523,7 @@ struct nr_stats_s {
 #define NR_AVE_PERIOD_EXP	27
 #define NR_AVE_SCALE(x)		((x) << FSHIFT)
 #define NR_AVE_PERIOD		(1 << NR_AVE_PERIOD_EXP)
-#define NR_AVE_DIV_PERIOD(x)	((x) >> NR_AVE_PERIOD_EXP))
+#define NR_AVE_DIV_PERIOD(x)	((x) >> NR_AVE_PERIOD_EXP)
 
 DECLARE_PER_CPU(struct nr_stats_s, runqueue_stats);
 #endif
@@ -977,7 +977,6 @@ static inline unsigned int do_avg_nr_running(struct rq *rq)
 	struct nr_stats_s *nr_stats = &per_cpu(runqueue_stats, rq->cpu);
 	unsigned int ave_nr_running = nr_stats->ave_nr_running;
 	s64 nr, deltax;
-	unsigned int ave_nr_running = rq->ave_nr_running;
 
 	deltax = rq->clock_task - nr_stats->nr_last_stamp;
 	nr = NR_AVE_SCALE(rq->nr_running);
