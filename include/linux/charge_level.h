@@ -14,12 +14,12 @@
  *
  */
 
-extern int ac_level;
-extern int usb_level;
-extern char charge_info_text[30];
-extern int charge_level;
-extern int charge_info_level_cur;
-extern int charge_info_level_req;
+int ac_level;
+int usb_level;
+char charge_info_text[30];
+int charge_level;
+int charge_info_level_cur;
+int charge_info_level_req;
 
 #define AC_CHARGE_LEVEL_DEFAULT 0	// 0 = stock charging logic will apply
 #define AC_CHARGE_LEVEL_MIN 0
