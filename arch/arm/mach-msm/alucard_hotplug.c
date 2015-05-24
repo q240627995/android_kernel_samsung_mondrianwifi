@@ -22,7 +22,6 @@
 #include <linux/mutex.h>
 #include <linux/module.h>
 #include <linux/slab.h>
-#include <soc/qcom/limiter.h>
 
 #ifdef CONFIG_POWERSUSPEND
 #include <linux/powersuspend.h>
