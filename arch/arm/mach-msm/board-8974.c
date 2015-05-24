@@ -411,20 +411,20 @@ static void samsung_sys_class_init(void)
 #ifdef CONFIG_BRICKED_THERMAL
 static struct msm_thermal_data msm_thermal_pdata = {
 	.sensor_id = 0,
-	.poll_ms = 400,
-	.shutdown_temp = 90,
+	.poll_ms = 200,
+	.shutdown_temp = 99,
 
-	.allowed_max_high = 89,
-	.allowed_max_low = 84,
-	.allowed_max_freq = 499200,
+	.allowed_max_high = 98,
+	.allowed_max_low = 91,
+	.allowed_max_freq = 1036800,
 
-	.allowed_mid_high = 83,
-	.allowed_mid_low = 77,
-	.allowed_mid_freq = 1113600,
+	.allowed_mid_high = 90,
+	.allowed_mid_low = 81,
+	.allowed_mid_freq = 1574400,
 
-	.allowed_low_high = 76,
-	.allowed_low_low = 70,
-	.allowed_low_freq = 1651200,
+	.allowed_low_high = 80,
+	.allowed_low_low = 75,
+	.allowed_low_freq = 1958400,
 };
 #endif
 
