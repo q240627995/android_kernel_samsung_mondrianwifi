@@ -233,7 +233,7 @@ static void __ref hotplug_work_fn(struct work_struct *work)
 		if (!force_up)
 			cur_freq = cpufreq_quick_get(cpu);
 		else
-			cur_freq = 2457600;
+			cur_freq = CONFIG_MSM_CPU_FREQ_MAX;
 		/* get nr online cpus */
 		online_cpus = num_online_cpus();
 
