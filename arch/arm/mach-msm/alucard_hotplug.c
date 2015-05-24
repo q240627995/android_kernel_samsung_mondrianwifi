@@ -22,6 +22,7 @@
 #include <linux/mutex.h>
 #include <linux/module.h>
 #include <linux/slab.h>
+#include <soc/qcom/limiter.h>
 
 #ifdef CONFIG_POWERSUSPEND
 #include <linux/powersuspend.h>
@@ -233,7 +234,7 @@ static void __ref hotplug_work_fn(struct work_struct *work)
 		if (!force_up)
 			cur_freq = cpufreq_quick_get(cpu);
 		else
-			cur_freq = CONFIG_MSM_CPU_FREQ_MAX;
+			cur_freq = DEFAULT_RESUME_FREQUENCY;
 		/* get nr online cpus */
 		online_cpus = num_online_cpus();
 
