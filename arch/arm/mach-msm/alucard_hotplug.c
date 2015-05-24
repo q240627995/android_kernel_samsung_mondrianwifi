@@ -234,7 +234,7 @@ static void __ref hotplug_work_fn(struct work_struct *work)
 		if (!force_up)
 			cur_freq = cpufreq_quick_get(cpu);
 		else
-			cur_freq = DEFAULT_RESUME_FREQUENCY;
+			cur_freq = 2457600;
 		/* get nr online cpus */
 		online_cpus = num_online_cpus();
 
