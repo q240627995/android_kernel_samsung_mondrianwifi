@@ -1085,6 +1085,7 @@ static void sdhci_prepare_data(struct sdhci_host *host, struct mmc_command *cmd)
 	sdhci_writew(host, SDHCI_MAKE_BLKSZ(SDHCI_DEFAULT_BOUNDARY_ARG,
 		data->blksz), SDHCI_BLOCK_SIZE);
 	sdhci_writew(host, data->blocks, SDHCI_BLOCK_COUNT);
+	host->last_blocks = 0;
 	SDHCI_TRACE_IRQ(host, "%lld: %s: 0x28=0x%08x 0x3E=0x%08x\n",
 			ktime_to_ms(ktime_get()), __func__,
 			sdhci_readb(host, SDHCI_HOST_CONTROL),
@@ -1244,7 +1245,8 @@ static void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
 	if (timeout < cmd->cmd_timeout_ms * 2)
 		timeout = cmd->cmd_timeout_ms * 2;
 
-	mod_timer(&host->timer, jiffies + msecs_to_jiffies(timeout));
+	host->timeout_jiffies = msecs_to_jiffies(timeout);
+	mod_timer(&host->timer, jiffies + host->timeout_jiffies);
 
 	host->cmd = cmd;
 
@@ -2757,11 +2759,29 @@ static void sdhci_timeout_timer(unsigned long data)
 {
 	struct sdhci_host *host;
 	unsigned long flags;
+	unsigned int blocks = 0;
 
 	host = (struct sdhci_host*)data;
 
 	spin_lock_irqsave(&host->lock, flags);
 
+	if (host->data) {
+		blocks = (sdhci_readw(host, SDHCI_BLOCK_SIZE) & 0xFFF) *
+			 sdhci_readw(host, SDHCI_BLOCK_COUNT);
+		/* If the transfer is not actually stuck, keep waiting. */
+		if (blocks != host->last_blocks) {
+			pr_info("%s: %swaiting on long transfer (%d of %d blocks)\n",
+				mmc_hostname(host->mmc),
+				host->last_blocks ? "still " : "",
+				(host->data->blksz * host->data->blocks) -
+				blocks,
+				(host->data->blksz * host->data->blocks));
+			host->last_blocks = blocks;
+			mod_timer(&host->timer,
+				  jiffies + host->timeout_jiffies);
+			goto out;
+		}
+	}
 	if (host->mrq) {
 		if (!host->mrq->cmd->ignore_timeout) {
 			pr_err("%s: Timeout waiting for hardware interrupt.\n",
@@ -2774,8 +2794,8 @@ static void sdhci_timeout_timer(unsigned long data)
 			pr_info("%s: bytes to transfer: %d transferred: %d\n",
 				mmc_hostname(host->mmc),
 				(host->data->blksz * host->data->blocks),
-				(sdhci_readw(host, SDHCI_BLOCK_SIZE) & 0xFFF) *
-				sdhci_readw(host, SDHCI_BLOCK_COUNT));
+				(host->data->blksz * host->data->blocks) -
+				blocks);
 			host->data->error = -ETIMEDOUT;
 			sdhci_finish_data(host);
 		} else {
@@ -2788,6 +2808,7 @@ static void sdhci_timeout_timer(unsigned long data)
 		}
 	}
 
+out:
 	mmiowb();
 	spin_unlock_irqrestore(&host->lock, flags);
 }
