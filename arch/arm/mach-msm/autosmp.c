@@ -53,10 +53,10 @@ static struct asmp_param_struct {
 	unsigned int cycle_down;
 } asmp_param = {
 	.delay = 100,
-	.scroff_single_core = false,
+	.scroff_single_core = true,
 	.max_cpus = CONFIG_NR_CPUS,
-	.min_cpus = 2,
-	.cpufreq_up = 90,
+	.min_cpus = 1,
+	.cpufreq_up = 85,
 	.cpufreq_down = 60,
 	.cycle_up = 1,
 	.cycle_down = 1,
