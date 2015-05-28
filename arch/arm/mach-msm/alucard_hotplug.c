@@ -712,14 +712,9 @@ static ssize_t store_max_frequency(struct kobject *a, struct attribute *b,
 	if (ret != 1)
 		return -EINVAL;
 
-	input = max(input > NR_CPUS ? NR_CPUS : input, 1);
-
-	if (hotplug_tuners_ins.max_frequency == input)
-		return count;
-
 	hotplug_tuners_ins.max_frequency = input;
 
-	return count;
+	return input;
 }
 
 /* maxcoreslimit */
