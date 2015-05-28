@@ -55,6 +55,7 @@ static struct hotplug_tuners {
 	unsigned int hotplug_sampling_rate;
 	unsigned int hotplug_enable;
 	unsigned int min_cpus_online;
+        unsigned int max_frequency;
 	unsigned int maxcoreslimit;
 	unsigned int maxcoreslimit_sleep;
 	unsigned int hp_io_is_busy;
@@ -69,6 +70,7 @@ static struct hotplug_tuners {
 	.hotplug_enable = 1,
 #endif
 	.min_cpus_online = 1,
+        .max_frequency=2265600,
 	.maxcoreslimit = NR_CPUS,
 	.maxcoreslimit_sleep = 1,
 	.hp_io_is_busy = 0,
@@ -233,7 +235,7 @@ static void __ref hotplug_work_fn(struct work_struct *work)
 		if (!force_up)
 			cur_freq = cpufreq_quick_get(cpu);
 		else
-			cur_freq = 2457600;
+			cur_freq = hotplug_tuners_ins.min_cpus_online;
 		/* get nr online cpus */
 		online_cpus = num_online_cpus();
 
@@ -495,6 +497,7 @@ static ssize_t show_##file_name						\
 show_one(hotplug_sampling_rate, hotplug_sampling_rate);
 show_one(hotplug_enable, hotplug_enable);
 show_one(min_cpus_online, min_cpus_online);
+show_one(max_frequency, max_frequency);
 show_one(maxcoreslimit, maxcoreslimit);
 show_one(maxcoreslimit_sleep, maxcoreslimit_sleep);
 show_one(hp_io_is_busy, hp_io_is_busy);
@@ -805,6 +808,7 @@ static ssize_t store_hotplug_suspend(struct kobject *a,
 define_one_global_rw(hotplug_sampling_rate);
 define_one_global_rw(hotplug_enable);
 define_one_global_rw(min_cpus_online);
+define_one_global_rw(max_frequency);
 define_one_global_rw(maxcoreslimit);
 define_one_global_rw(maxcoreslimit_sleep);
 define_one_global_rw(hp_io_is_busy);
@@ -838,6 +842,7 @@ static struct attribute *alucard_hotplug_attributes[] = {
 	&hotplug_rate_3_1.attr,
 	&hotplug_rate_4_0.attr,
 	&min_cpus_online.attr,
+        &max_frequency,
 	&maxcoreslimit.attr,
 	&maxcoreslimit_sleep.attr,
 	&hp_io_is_busy.attr,
