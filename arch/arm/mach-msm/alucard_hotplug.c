@@ -701,6 +701,27 @@ static ssize_t store_min_cpus_online(struct kobject *a, struct attribute *b,
 	return count;
 }
 
+/* min_cpus_online */
+static ssize_t store_max_frequency(struct kobject *a, struct attribute *b,
+				  const char *buf, size_t count)
+{
+	int input;
+	int ret;
+
+	ret = sscanf(buf, "%u", &input);
+	if (ret != 1)
+		return -EINVAL;
+
+	input = max(input > NR_CPUS ? NR_CPUS : input, 1);
+
+	if (hotplug_tuners_ins.max_frequency == input)
+		return count;
+
+	hotplug_tuners_ins.max_frequency = input;
+
+	return count;
+}
+
 /* maxcoreslimit */
 static ssize_t store_maxcoreslimit(struct kobject *a, struct attribute *b,
 				  const char *buf, size_t count)
@@ -842,7 +863,7 @@ static struct attribute *alucard_hotplug_attributes[] = {
 	&hotplug_rate_3_1.attr,
 	&hotplug_rate_4_0.attr,
 	&min_cpus_online.attr,
-        &max_frequency,
+        &max_frequency.attr,
 	&maxcoreslimit.attr,
 	&maxcoreslimit_sleep.attr,
 	&hp_io_is_busy.attr,
