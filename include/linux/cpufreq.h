@@ -388,7 +388,7 @@ int get_min_freq(void);
 #define UPDATE_NOW_BITS		0xFF
 #else
 #define MIN_TOUCH_LIMIT		1728000
-#define MIN_TOUCH_HIGH_LIMIT	2457600
+#define MIN_TOUCH_HIGH_LIMIT	2265600
 #define MIN_CAMERA_LIMIT    998400
 #define MIN_TOUCH_LIMIT_SECOND	1190400
 #endif
