@@ -2303,7 +2303,8 @@ static ssize_t _wake_nice_store(struct device *dev,
 				     struct device_attribute *attr,
 				     const char *buf, size_t count)
 {
-	return _ft_sysfs_store(buf, count, &_wake_nice);
+    	int ret = kgsl_sysfs_store(buf, &_wake_nice);
+	return ret < 0 ? ret : count;
 }
 
 /**
