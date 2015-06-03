@@ -32,7 +32,6 @@
 // #define DISABLE_POWER_MANAGEMENT
 
 // AP: use msm8974 lcd status notifier
-#define USE_LCD_NOTIFIER
 
 #include <linux/cpu.h>
 #ifdef USE_LCD_NOTIFIER
