@@ -7600,7 +7600,7 @@ static struct early_suspend __refdata _powersave_early_suspend = {
   .resume = powersave_late_resume,
   .level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN,
 };
-#elif defined(CONFIG_POWERSUSPEND) && !defined(USE_LCD_NOTIFIER) && !defined (DISABLE_POWER_MANAGEMENT)
+#elif defined(CONFIG_POWERSUSPEND) && !defined (DISABLE_POWER_MANAGEMENT)
 static struct power_suspend __refdata powersave_powersuspend = {
   .suspend = powersave_suspend,
   .resume = powersave_resume,
