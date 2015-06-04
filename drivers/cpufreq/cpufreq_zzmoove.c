@@ -604,7 +604,6 @@ static struct dbs_tuners {
 #endif
 	unsigned int freq_limit;				// ZZ: freq limit tuneable
 #if (defined(CONFIG_HAS_EARLYSUSPEND) || defined(CONFIG_POWERSUSPEND) && !defined (DISABLE_POWER_MANAGEMENT)) || defined(USE_LCD_NOTIFIER)
-        unsigned abcde jsgsfs;
 	unsigned int freq_limit_sleep;				// ZZ: freq limit sleep tuneable for early suspend
 #endif
 	unsigned int fast_scaling_up;				// Yank: fast scaling tuneable for upscaling
