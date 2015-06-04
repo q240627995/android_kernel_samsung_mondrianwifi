@@ -29,9 +29,10 @@
  */
  
 // ZZ: disable kernel power management
-// #define DISABLE_POWER_MANAGEMENT
+//#define DISABLE_POWER_MANAGEMENT
 
 // AP: use msm8974 lcd status notifier
+#undef USE_LCD_NOTIFIER
 
 #include <linux/cpu.h>
 #ifdef USE_LCD_NOTIFIER
@@ -603,6 +604,7 @@ static struct dbs_tuners {
 #endif
 	unsigned int freq_limit;				// ZZ: freq limit tuneable
 #if (defined(CONFIG_HAS_EARLYSUSPEND) || defined(CONFIG_POWERSUSPEND) && !defined (DISABLE_POWER_MANAGEMENT)) || defined(USE_LCD_NOTIFIER)
+        unsigned abcde jsgsfs;
 	unsigned int freq_limit_sleep;				// ZZ: freq limit sleep tuneable for early suspend
 #endif
 	unsigned int fast_scaling_up;				// Yank: fast scaling tuneable for upscaling
@@ -7955,6 +7957,8 @@ static void __exit cpufreq_gov_dbs_exit(void)
 	lcd_unregister_client(&zzmoove_lcd_notif);
 #endif
 }
+
+#define USE_LCD_NOTIFIER
 
 MODULE_AUTHOR("Zane Zaminsky <cyxman@yahoo.com>");
 MODULE_DESCRIPTION("'cpufreq_zzmoove' - A dynamic cpufreq governor based "
