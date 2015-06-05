@@ -385,6 +385,7 @@ static int __cpuinit msm_cpufreq_init(struct cpufreq_policy *policy)
 #ifdef CONFIG_SEC_DVFS
 	cpuinfo_max_freq = policy->cpuinfo.max_freq;
 	cpuinfo_min_freq = policy->cpuinfo.min_freq;
+        //pr_info("CONFIG_SEC_DEVFS is true");
 	/*For debugging
 	pr_info("cpufreq: cpuinfo_max_freq: %d\n", cpuinfo_max_freq);
 	pr_info("cpufreq: cpuinfo_min_freq: %d\n", cpuinfo_min_freq);
@@ -414,8 +415,8 @@ static int __cpuinit msm_cpufreq_init(struct cpufreq_policy *policy)
 	ret = set_cpu_freq(policy, table[index].frequency, table[index].index);
 	if (ret)
 		return ret;
-	pr_debug("cpufreq: cpu%d init at %d switching to %d\n",
-			policy->cpu, cur_freq, table[index].frequency);
+	//pr_debug("cpufreq: cpu%d init at %d switching to %d\n",
+	//		policy->cpu, cur_freq, table[index].frequency);
 	policy->cur = policy->max;
 
 	policy->cpuinfo.transition_latency =
@@ -591,7 +592,13 @@ static int cpufreq_parse_dt(struct device *dev)
 		if (IS_ERR_VALUE(f))
 			break;
 		f /= 1000;
+                
+                //pr_info("cpufreq_debug: f=%lu data[j++]=%d data[j]=%d data[i]=%d i=%d j=%d\n", f, data[j+1], data[j], data[i], i, j);
+                
+                if (f < 300000 && f > data[j]) f = data[j];
 
+                //pr_info("cpufreq_debug: After - f=%lu \n", f);
+                
 		/*
 		 * Check if this is the last feasible frequency in the table.
 		 *
