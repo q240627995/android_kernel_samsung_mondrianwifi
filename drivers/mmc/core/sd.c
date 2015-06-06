@@ -1130,7 +1130,7 @@ free_card:
 	else
 		pr_info("%s: card status is 0x%.8x\n", __func__, status);
 
-	if (!oldcard)
+	if (!oldcard) {
 		host->card = NULL;
 		mmc_remove_card(card);
 	}
