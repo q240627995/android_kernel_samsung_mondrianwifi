@@ -50,14 +50,14 @@ MODULE_DESCRIPTION(DRIVER_DESCRIPTION);
 MODULE_VERSION(DRIVER_VERSION);
 MODULE_LICENSE("GPLv2");
 
-#ifdef CONFIG_MACH_MSM8974_HAMMERHEAD
-/* Hammerhead aka Nexus 5 */
-#define S2W_Y_MAX               1920
-#define S2W_X_MAX               1080
+#ifdef CONFIG_MACH_MONDRIAN_WIFI
+/* Mondrian wifi tab */
+#define S2W_Y_MAX               2560
+#define S2W_X_MAX               1600
 #define S2W_Y_LIMIT             S2W_Y_MAX-130
-#define S2W_X_B1                400
-#define S2W_X_B2                700
-#define S2W_X_FINAL             250
+#define S2W_X_B1                500
+#define S2W_X_B2                1000
+#define S2W_X_FINAL             300
 #elif defined(CONFIG_MACH_APQ8064_MAKO)
 /* Mako aka Nexus 4 */
 #define S2W_Y_LIMIT             2350
