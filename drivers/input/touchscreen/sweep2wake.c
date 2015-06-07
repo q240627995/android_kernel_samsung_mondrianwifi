@@ -58,6 +58,12 @@ MODULE_LICENSE("GPLv2");
 #define S2W_X_B1                500
 #define S2W_X_B2                1000
 #define S2W_X_FINAL             300
+/* Right -> Left */
+#define S2W_X_B0				250
+/* Left -> Right */
+#define S2W_X_B3				S2W_X_B0+130
+#define S2W_X_B4				S2W_X_MAX-400
+#define S2W_X_B5				S2W_X_MAX-S2W_X_B0
 #elif defined(CONFIG_MACH_APQ8064_MAKO)
 /* Mako aka Nexus 4 */
 #define S2W_Y_LIMIT             2350
@@ -65,6 +71,7 @@ MODULE_LICENSE("GPLv2");
 #define S2W_X_B1                500
 #define S2W_X_B2                1000
 #define S2W_X_FINAL             300
+
 #elif defined(CONFIG_MACH_APQ8064_FLO)
 /* Flo/Deb aka Nexus 7 2013 */
 #define S2W_Y_MAX               2240
