@@ -310,9 +310,12 @@ static void intelli_plug_suspend(struct work_struct *work)
 
 	/* Put all sibling cores to sleep */
 	for_each_online_cpu(cpu) {
-		if (cpu == 0)
-			continue;
-		cpu_down(cpu);
+			if (cpu == 0)
+				continue;
+			if (cpu == 3)
+				cpu_down(cpu);
+			if (cpu == 2)
+				cpu_down(cpu);
 	}
 }
 

@@ -494,11 +494,14 @@ static void msm_hotplug_suspend(struct work_struct *work)
 	flush_workqueue(hotplug_wq);
 	cancel_delayed_work_sync(&hotplug_work);
 
-	/* Put all sibling cores to sleep */
+	/* Put 2,3 sibling cores to sleep */
 	for_each_online_cpu(cpu) {
 		if (cpu == 0)
 			continue;
-		cpu_down(cpu);
+		if (cpu == 3)
+			cpu_down(cpu);
+		if (cpu == 2)
+			cpu_down(cpu);
 	}
 }
 
