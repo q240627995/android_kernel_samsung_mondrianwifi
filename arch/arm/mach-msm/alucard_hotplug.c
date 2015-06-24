@@ -55,7 +55,6 @@ static struct hotplug_tuners {
 	unsigned int hotplug_sampling_rate;
 	unsigned int hotplug_enable;
 	unsigned int min_cpus_online;
-        unsigned int max_frequency;
 	unsigned int maxcoreslimit;
 	unsigned int maxcoreslimit_sleep;
 	unsigned int hp_io_is_busy;
@@ -70,7 +69,6 @@ static struct hotplug_tuners {
 	.hotplug_enable = 1,
 #endif
 	.min_cpus_online = 1,
-        .max_frequency=2265600,
 	.maxcoreslimit = NR_CPUS,
 	.maxcoreslimit_sleep = 1,
 	.hp_io_is_busy = 0,
@@ -339,19 +337,10 @@ static void __ref __alucard_hotplug_suspend(struct power_suspend *handler)
 static void __ref __alucard_hotplug_suspend(void)
 #endif
 {
-	int cpu;
-
 	if (hotplug_tuners_ins.hotplug_enable > 0
 				&& hotplug_tuners_ins.hotplug_suspend == 1 &&
 				hotplug_tuners_ins.suspended == false) {
 			hotplug_tuners_ins.suspended = true;
-
-			/* Put all sibling cores to sleep */
-			for_each_online_cpu(cpu) {
-				if (cpu == 0)
-					continue;
-				cpu_down(cpu);
-			}
 			pr_info("Alucard HotPlug suspended.\n");
 	}
 }
@@ -416,7 +405,7 @@ static int alucard_hotplug_callback(struct notifier_block *nb,
 	struct hotplug_cpuinfo *pcpu_info;
 	unsigned int cpu = (int)data;
 
-	switch (action & (~CPU_TASKS_FROZEN)) {
+	switch (action) {
 	case CPU_ONLINE:
 		pcpu_info = &per_cpu(od_hotplug_cpuinfo, cpu);
 		pcpu_info->prev_cpu_idle = get_cpu_idle_time(cpu,
@@ -510,7 +499,6 @@ static ssize_t show_##file_name						\
 show_one(hotplug_sampling_rate, hotplug_sampling_rate);
 show_one(hotplug_enable, hotplug_enable);
 show_one(min_cpus_online, min_cpus_online);
-show_one(max_frequency, max_frequency);
 show_one(maxcoreslimit, maxcoreslimit);
 show_one(maxcoreslimit_sleep, maxcoreslimit_sleep);
 show_one(hp_io_is_busy, hp_io_is_busy);
@@ -714,22 +702,6 @@ static ssize_t store_min_cpus_online(struct kobject *a, struct attribute *b,
 	return count;
 }
 
-/* min_cpus_online */
-static ssize_t store_max_frequency(struct kobject *a, struct attribute *b,
-				  const char *buf, size_t count)
-{
-	int input;
-	int ret;
-
-	ret = sscanf(buf, "%u", &input);
-	if (ret != 1)
-		return -EINVAL;
-
-	hotplug_tuners_ins.max_frequency = input;
-
-	return input;
-}
-
 /* maxcoreslimit */
 static ssize_t store_maxcoreslimit(struct kobject *a, struct attribute *b,
 				  const char *buf, size_t count)
@@ -837,7 +809,6 @@ static ssize_t store_hotplug_suspend(struct kobject *a,
 define_one_global_rw(hotplug_sampling_rate);
 define_one_global_rw(hotplug_enable);
 define_one_global_rw(min_cpus_online);
-define_one_global_rw(max_frequency);
 define_one_global_rw(maxcoreslimit);
 define_one_global_rw(maxcoreslimit_sleep);
 define_one_global_rw(hp_io_is_busy);
@@ -871,7 +842,6 @@ static struct attribute *alucard_hotplug_attributes[] = {
 	&hotplug_rate_3_1.attr,
 	&hotplug_rate_4_0.attr,
 	&min_cpus_online.attr,
-        &max_frequency.attr,
 	&maxcoreslimit.attr,
 	&maxcoreslimit_sleep.attr,
 	&hp_io_is_busy.attr,
