@@ -156,11 +156,7 @@ static bool mdss_mdp_kcal_is_panel_on(void)
 
 	for (i = 0; i < mdata->nctl; i++) {
 		ctl = mdata->ctl_off + i;
-<<<<<<< HEAD
 		if (ctl->power_on)
-=======
-		if (mdss_mdp_ctl_is_power_on(ctl))
->>>>>>> 5b53a18... msm: mdss: Add KCAL support for post processing control [v2]
 			return true;
 	}
 
