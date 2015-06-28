@@ -41,12 +41,12 @@ struct alarm {
 	void			*data;
 };
 
-void alarm_init(struct alarm *alarm, enum alarmtimer_type type,
+void alarm_init_(struct alarm *alarm, enum alarmtimer_type type,
 		enum alarmtimer_restart (*function)(struct alarm *, ktime_t));
-void alarm_start(struct alarm *alarm, ktime_t start);
-int alarm_try_to_cancel(struct alarm *alarm);
-int alarm_cancel(struct alarm *alarm);
-void set_power_on_alarm(long secs, bool enable);
+void alarm_start_(struct alarm *alarm, ktime_t start);
+int alarm_try_to_cancel_(struct alarm *alarm);
+int alarm_cancel_(struct alarm *alarm);
+void set_power_on_alarm_(long secs, bool enable);
 void power_on_alarm_init(void);
 
 u64 alarm_forward(struct alarm *alarm, ktime_t now, ktime_t interval);

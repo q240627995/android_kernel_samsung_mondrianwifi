@@ -74,7 +74,7 @@ void power_on_alarm_init(void)
 		power_on_alarm = 0;
 }
 
-void set_power_on_alarm(long secs, bool enable)
+void set_power_on_alarm_(long secs, bool enable)
 {
 	int rc;
 	struct timespec wall_time;
@@ -203,7 +203,7 @@ struct rtc_device *alarmtimer_get_rtcdev(void)
 static inline int alarmtimer_rtc_interface_setup(void) { return 0; }
 static inline void alarmtimer_rtc_interface_remove(void) { }
 static inline void alarmtimer_rtc_timer_init(void) { }
-void set_power_on_alarm(long secs, bool enable) { }
+void set_power_on_alarm_(long secs, bool enable) { }
 #endif
 
 /**
@@ -396,12 +396,12 @@ static void alarmtimer_freezerset(ktime_t absexp, enum alarmtimer_type type)
 
 
 /**
- * alarm_init - Initialize an alarm structure
+ * alarm_init_ - Initialize an alarm structure
  * @alarm: ptr to alarm to be initialized
  * @type: the type of the alarm
  * @function: callback that is run when the alarm fires
  */
-void alarm_init(struct alarm *alarm, enum alarmtimer_type type,
+void alarm_init_(struct alarm *alarm, enum alarmtimer_type type,
 		enum alarmtimer_restart (*function)(struct alarm *, ktime_t))
 {
 	timerqueue_init(&alarm->node);
@@ -429,13 +429,13 @@ void alarm_start(struct alarm *alarm, ktime_t start)
 }
 
 /**
- * alarm_try_to_cancel - Tries to cancel an alarm timer
+ * alarm_try_to_cancel_ - Tries to cancel an alarm timer
  * @alarm: ptr to alarm to be canceled
  *
  * Returns 1 if the timer was canceled, 0 if it was not running,
  * and -1 if the callback was running
  */
-int alarm_try_to_cancel(struct alarm *alarm)
+int alarm_try_to_cancel_(struct alarm *alarm)
 {
 	struct alarm_base *base = &alarm_bases[alarm->type];
 	unsigned long flags;
@@ -457,15 +457,15 @@ out:
 
 
 /**
- * alarm_cancel - Spins trying to cancel an alarm timer until it is done
+ * alarm_cancel_ - Spins trying to cancel an alarm timer until it is done
  * @alarm: ptr to alarm to be canceled
  *
  * Returns 1 if the timer was canceled, 0 if it was not active.
  */
-int alarm_cancel(struct alarm *alarm)
+int alarm_cancel_(struct alarm *alarm)
 {
 	for (;;) {
-		int ret = alarm_try_to_cancel(alarm);
+		int ret = alarm_try_to_cancel_(alarm);
 		if (ret >= 0)
 			return ret;
 		cpu_relax();
@@ -597,7 +597,7 @@ static int alarm_timer_create(struct k_itimer *new_timer)
 
 	type = clock2alarm(new_timer->it_clock);
 	base = &alarm_bases[type];
-	alarm_init(&new_timer->it.alarm.alarmtimer, type, alarm_handle_timer);
+	alarm_init_(&new_timer->it.alarm.alarmtimer, type, alarm_handle_timer);
 	return 0;
 }
 
@@ -631,7 +631,7 @@ static int alarm_timer_del(struct k_itimer *timr)
 	if (!rtcdev)
 		return -ENOTSUPP;
 
-	if (alarm_try_to_cancel(&timr->it.alarm.alarmtimer) < 0)
+	if (alarm_try_to_cancel_(&timr->it.alarm.alarmtimer) < 0)
 		return TIMER_RETRY;
 
 	return 0;
@@ -657,7 +657,7 @@ static int alarm_timer_set(struct k_itimer *timr, int flags,
 		alarm_timer_get(timr, old_setting);
 
 	/* If the timer was already set, cancel it */
-	if (alarm_try_to_cancel(&timr->it.alarm.alarmtimer) < 0)
+	if (alarm_try_to_cancel_(&timr->it.alarm.alarmtimer) < 0)
 		return TIMER_RETRY;
 
 	/* start the timer */
@@ -700,7 +700,7 @@ static int alarmtimer_do_nsleep(struct alarm *alarm, ktime_t absexp)
 		if (likely(alarm->data))
 			schedule();
 
-		alarm_cancel(alarm);
+		alarm_cancel_(alarm);
 	} while (alarm->data && !signal_pending(current));
 
 	__set_current_state(TASK_RUNNING);
@@ -752,7 +752,7 @@ static long __sched alarm_timer_nsleep_restart(struct restart_block *restart)
 	int ret = 0;
 
 	exp.tv64 = restart->nanosleep.expires;
-	alarm_init(&alarm, type, alarmtimer_nsleep_wakeup);
+	alarm_init_(&alarm, type, alarmtimer_nsleep_wakeup);
 
 	if (alarmtimer_do_nsleep(&alarm, exp))
 		goto out;
@@ -798,7 +798,7 @@ static int alarm_timer_nsleep(const clockid_t which_clock, int flags,
 	if (!capable(CAP_WAKE_ALARM))
 		return -EPERM;
 
-	alarm_init(&alarm, type, alarmtimer_nsleep_wakeup);
+	alarm_init_(&alarm, type, alarmtimer_nsleep_wakeup);
 
 	exp = timespec_to_ktime(*tsreq);
 	/* Convert (if necessary) to absolute time */

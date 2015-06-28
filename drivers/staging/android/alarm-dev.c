@@ -91,7 +91,7 @@ static int devalarm_try_to_cancel(struct devalarm *alrm)
 static void devalarm_cancel(struct devalarm *alrm)
 {
 	if (is_wakeup(alrm->type))
-		alarm_cancel(&alrm->u.alrm);
+		alarm_cancel_(&alrm->u.alrm);
 	else
 		hrtimer_cancel(&alrm->u.hrt);
 }
@@ -111,7 +111,7 @@ static void alarm_clear(enum android_alarm_type alarm_type, struct timespec *ts)
 			__pm_relax(&alarm_wake_lock);
 	}
 	alarm_enabled &= ~alarm_type_mask;
-	spin_unlock_irqrestore(&alarm_slock, flags);
+	spin_unlock_irqrestore(&alarm_slock, flags);`
 
 	if (alarm_type == ANDROID_ALARM_RTC_POWEROFF_WAKEUP)
 		set_power_on_alarm(ts->tv_sec, 0);
