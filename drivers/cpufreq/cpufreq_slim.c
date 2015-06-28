@@ -889,7 +889,7 @@ static void dbs_freq_increase(struct cpufreq_policy *p, unsigned load, unsigned 
 	trace_cpufreq_slim_up (p->cpu, freq, p->cur);
 }
 
-int set_two_phase_freq(int cpufreq)
+int set_two_phase_freq_(int cpufreq)
 {
 	int i  = 0;
 	for ( i = 0 ; i < NR_CPUS; i++)
@@ -897,11 +897,11 @@ int set_two_phase_freq(int cpufreq)
 	return 0;
 }
 
-void set_two_phase_freq_by_cpu ( int cpu_nr, int cpufreq){
+void set_two_phase_freq_by_cpu_ ( int cpu_nr, int cpufreq){
 	two_phase_freq_array[cpu_nr-1] = cpufreq;
 }
 
-int input_event_boosted(void)
+int input_event_boosted_(void)
 {
 	unsigned long flags;
 
@@ -1129,7 +1129,7 @@ static void dbs_check_cpu(struct cpu_dbs_info_s *this_dbs_info)
 		}
 	}
 
-	if (input_event_boosted())
+	if (input_event_boosted_())
 	{
 		trace_cpufreq_slim_already (policy->cpu, cur_load, policy->cur, policy->cur, policy->cur);
 		return;
@@ -1205,7 +1205,7 @@ static void do_dbs_timer(struct work_struct *work)
 				delay -= jiffies % delay;
 		}
 	} else {
-		if (input_event_boosted())
+		if (input_event_boosted_())
 			goto sched_wait;
 
 		__cpufreq_driver_target(dbs_info->cur_policy,
@@ -1349,7 +1349,7 @@ static struct input_handler dbs_input_handler = {
 };
 
 
-void set_input_event_min_freq_by_cpu ( int cpu_nr, int cpufreq){
+void set_input_event_min_freq_by_cpu_ ( int cpu_nr, int cpufreq){
 	input_event_min_freq_array[cpu_nr-1] = cpufreq;
 }
 static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
