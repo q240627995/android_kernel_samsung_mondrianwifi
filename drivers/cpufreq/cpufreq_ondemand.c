@@ -1351,6 +1351,10 @@ static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 		break;
 
 	case CPUFREQ_GOV_LIMITS:
+		/* If device is being removed, skip set limits */
+		if (!this_dbs_info->cur_policy
+			 || !policy->cur)
+			break;
 		mutex_lock(&this_dbs_info->timer_mutex);
 		if (this_dbs_info->cur_policy == NULL) {
 			pr_debug("Unable to limit cpu freq due to cur_policy == NULL\n");
