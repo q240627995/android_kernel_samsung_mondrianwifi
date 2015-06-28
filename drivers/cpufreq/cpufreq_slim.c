@@ -122,7 +122,7 @@ static unsigned int *tblmap[TABLE_SIZE] __read_mostly;
 static unsigned int tbl_select[4];
 static unsigned int up_threshold_level[2] __read_mostly = {90, 85};
 static int input_event_counter = 0;
-struct timer_list freq_mode_timer;
+struct timer_list freq_mode_timer_;
 
 static inline void switch_turbo_mode(unsigned);
 static inline void switch_normal_mode(void);
@@ -755,7 +755,7 @@ static struct attribute_group dbs_attr_group = {
 static inline void switch_turbo_mode(unsigned timeout)
 {
 	if (timeout > 0)
-		mod_timer(&freq_mode_timer, jiffies + msecs_to_jiffies(timeout));
+		mod_timer(&freq_mode_timer_, jiffies + msecs_to_jiffies(timeout));
 	tbl_select[0] = 2;
 	tbl_select[1] = 3;
 	tbl_select[2] = 4;
@@ -823,9 +823,9 @@ static void dbs_init_freq_map_table(struct cpufreq_policy *policy)
 
 	switch_normal_mode();
 
-	init_timer(&freq_mode_timer);
-	freq_mode_timer.function = switch_mode_timer;
-	freq_mode_timer.data = 0;
+	init_timer(&freq_mode_timer_);
+	freq_mode_timer_.function = switch_mode_timer;
+	freq_mode_timer_.data = 0;
 
 #if 0
 	for (i = 0; i < TABLE_SIZE; i++) {
@@ -849,7 +849,7 @@ static void dbs_deinit_freq_map_table(void)
 	for (i = 0; i < TABLE_SIZE; i++)
 		kfree(tblmap[i]);
 
-	del_timer(&freq_mode_timer);
+	del_timer(&freq_mode_timer_);
 }
 
 static inline int get_cpu_freq_index(unsigned int freq)
