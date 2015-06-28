@@ -43,16 +43,10 @@
 #define INIT_UDELAY		200
 #define MAX_UDELAY		2000
 
-#ifdef CONFIG_CPU_FREQ_GOV_ELEMENTALX
 int graphics_boost = 6;
-#endif
 
 /* Number of jiffies for a full thermal cycle */
 #define TH_HZ			20
-
-#ifdef CONFIG_CPU_FREQ_GOV_SLIM
-int graphics_boost = 6;
-#endif
 
 struct clk_pair {
 	const char *name;
