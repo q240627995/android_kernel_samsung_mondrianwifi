@@ -41,7 +41,7 @@
 #define FREQ_RESPONSIVENESS		1958400
 #endif
 
-#define CPUS_DOWN_RATE			1
+#define CPUS_DOWN_RATE			2
 #define CPUS_UP_RATE			1
 
 #define DEC_CPU_LOAD			70
@@ -51,8 +51,8 @@
 #define INC_CPU_LOAD_AT_MIN_FREQ	60
 
 /* Pump Inc/Dec for all cores */
-#define PUMP_INC_STEP_AT_MIN_FREQ	6
-#define PUMP_INC_STEP			3
+#define PUMP_INC_STEP_AT_MIN_FREQ	3
+#define PUMP_INC_STEP			2
 #define PUMP_DEC_STEP			1
 
 /* sample rate */
@@ -629,7 +629,7 @@ static void do_alucard_timer(struct work_struct *work)
 		delay = max(delay - (jiffies % delay), usecs_to_jiffies(alucard_tuners_ins.sampling_rate / 2));
 	}
 
-	mod_delayed_work_on(this_alucard_cpuinfo->cpu,
+	queue_delayed_work_on(this_alucard_cpuinfo->cpu,
 		system_wq, &this_alucard_cpuinfo->work, delay);
 	mutex_unlock(&this_alucard_cpuinfo->timer_mutex);
 }
@@ -690,9 +690,8 @@ static int cpufreq_governor_alucard(struct cpufreq_policy *policy,
 		}
 
 		INIT_DELAYED_WORK_DEFERRABLE(&this_alucard_cpuinfo->work, do_alucard_timer);
-		mod_delayed_work_on(cpu,
+		queue_delayed_work_on(cpu,
 			system_wq, &this_alucard_cpuinfo->work, delay);
-
 
 		break;
 	case CPUFREQ_GOV_STOP:
@@ -722,12 +721,8 @@ static int cpufreq_governor_alucard(struct cpufreq_policy *policy,
 			mutex_unlock(&this_alucard_cpuinfo->timer_mutex);
 			return -EPERM;
 		}
-		if (policy->max < this_alucard_cpuinfo->cur_policy->cur)
-			__cpufreq_driver_target(this_alucard_cpuinfo->cur_policy,
-				policy->max, CPUFREQ_RELATION_H);
-		else if (policy->min > this_alucard_cpuinfo->cur_policy->cur)
-			__cpufreq_driver_target(this_alucard_cpuinfo->cur_policy,
-				policy->min, CPUFREQ_RELATION_L);
+		__cpufreq_driver_target(this_alucard_cpuinfo->cur_policy,
+				policy->cur, CPUFREQ_RELATION_L);
 
 		cpufreq_frequency_table_policy_minmax_limits(policy,
 				this_alucard_cpuinfo);
