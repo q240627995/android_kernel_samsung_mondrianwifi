@@ -15,6 +15,7 @@
  */
 #ifndef USER_PGTABLES_CEILING
 #define USER_PGTABLES_CEILING	0UL
+#endif
 
 #ifdef CONFIG_TIMA_RKP_L2_GROUP
 /* Structure of a grouped entry */
