@@ -689,25 +689,6 @@ void add_device_randomness(const void *buf, unsigned int size)
 EXPORT_SYMBOL(add_device_randomness);
 
 /*
- * Add device- or boot-specific data to the input and nonblocking
- * pools to help initialize them to unique values.
- *
- * None of this adds any entropy, it is meant to avoid the
- * problem of the nonblocking pool having similar initial state
- * across largely identical devices.
- */
-void add_device_randomness(const void *buf, unsigned int size)
-{
-	unsigned long time = get_cycles() ^ jiffies;
-
-	mix_pool_bytes(&input_pool, buf, size, NULL);
-	mix_pool_bytes(&input_pool, &time, sizeof(time), NULL);
-	mix_pool_bytes(&nonblocking_pool, buf, size, NULL);
-	mix_pool_bytes(&nonblocking_pool, &time, sizeof(time), NULL);
-}
-EXPORT_SYMBOL(add_device_randomness);
-
-/*
  * This function adds entropy to the entropy "pool" by using timing
  * delays.  It uses the timer_rand_state structure to make an estimate
  * of how many bits of entropy this call has added to the pool.
